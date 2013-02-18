@@ -1,0 +1,1182 @@
+#+TITLE: org-mode
+#+AUTHOR: Ryo Takaishi
+#+LINK_HOME: http://repl.info/
+#+LINK_UP: http://repl.info/emacs/config/
+#+OPTIONS: toc:nil author:nil creator:nil
+#+STARTUP: overview
+* 初期設定
+:PROPERTIES:
+:MTIME: 1323692477
+:MTIME-1: <2011-12-12 月 21:21:17>
+:END:
+** load-pathの設定
+:PROPERTIES:
+:Modified: 1323683081
+:Modified-1: <2011-12-12 月 18:44:41>
+:MTIME: 1324372118
+:MTIME-1: <2011-12-20 火 18:08:38>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/site-lisp/org-mode/lisp")
+  (add-to-list 'load-path "~/.emacs.d/site-lisp/org-mode/contrib/lisp")
+  
+  (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+  (add-to-list 'load-path "~/code/elisp/org-book-manager")
+    
+    (add-hook 'org-mode-hook
+              '(lambda ()
+                 (setq indent-tabs-mode nil)))
+    
+    (require 'org-capture)
+    (require 'org-exp-bibtex)
+    (require 'org-latex)
+    (require 'org-colview)
+    (require 'org-habit)
+    (require 'org-id)
+#+END_SRC
+* キーバインド
+:PROPERTIES:
+:MTIME: 1324283605
+:MTIME-1: <2011-12-19 月 17:33:25>
+:END:
+
+#+CAPTION: key binding
+#+ATTR_HTML:
+| key   | function       |
+|-------+----------------|
+| C-c l | org-store-link |
+| C-c a | org-agenda     |
+| C-c b | org-isqitchb   |
+
+
+#+BEGIN_SRC emacs-lisp
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(define-key global-map "\C-cb" 'org-iswitchb)
+
+(add-hook 'org-mode-hook
+	  '(lambda ()
+	     (setq fill-column 65)
+	     (auto-fill-mode 1)))
+#+END_SRC
+* アジェンダファイル
+
+現在、org-modeが管理しているファイルは3つ．
+
+- refile.org: INBOXファイル．org-captureでC-c C-cを実行した場合はここにリファイルされる．
+- todo.org: タスク管理用ファイル．
+- notes.org: メモ・ノート用ファイル．
+- info.org: 使ってるサービスやその支払い情報等を管理。Dropboxで同期はしていない。
+- work.org: 会社のタスクを管理
+- trac.org: チケットのインポート用
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-files-dir "~/doc/")
+  
+  (cond
+   (run-w32
+    (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org" "work.org")))
+   ((or run-mac (string= (system-name) "ubuntu"))
+    (setq org-agenda-files-dir "~/Documents/")
+    (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org")))
+   (run-linux
+    (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org"))))
+   
+  (setq org-agenda-files (mapcar (lambda (f) (concat org-agenda-files-dir f))
+                                 org-agenda-files-suffix))
+  
+  (defmacro work-in-turris (&rest body)
+    `(if (string= "turris" (system-name))
+         (cond ,body)
+       ))
+  
+  (defmacro work-in-macbook (&rest body)
+    `(if (string= "takaishi-no-MacBook-Air.local" (system-name))
+         (cond ,body)
+       ))
+  
+  (work-in-turris
+   (setq org-agenda-files (cons "~/work/work.org" org-agenda-files))
+   (setq org-agenda-files (cons "~/work/trac.org" org-agenda-files)))
+                                   
+  (work-in-macbook
+   (setq org-agenda-files (cons "~/Documents/info.org" org-agenda-files)))
+#+END_SRC
+* アジェンダビュー
+
+#+BEGIN_SRC emacs-lisp
+  ;; ウィークリー/デイリーアジェンダ(C-c a a)の初期表示をデイリーにする
+  (setq org-agenda-span 'day)
+  
+  ;; 時間表示が1桁の時、0をつける
+  (setq org-agenda-time-leading-zero t)
+  
+  ;; log-modeで表示するアイテム
+  (setq org-agenda-log-mode-items (quote (closed state)))
+#+END_SRC
+** アジェンダコマンドをカスタマイズする
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-custom-commands
+        `(("N" "Notes" tags "NOTE"
+           ((org-agenda-overriding-header "Notes")
+            (org-tags-match-list-sublevels t)))
+          
+          ("r" "Tasks to Refile" tags "REFILE"
+           ((org-agenda-overriding-header "Notes and Tasks to Refile")
+            (org-agenda-overriding-header "Tasks to Refile")))
+          
+          ("h" "Habits" tags-todo "STYLE=\"habit\""
+           ((org-agenda-overriding-header "Habits")
+            (org-agenda-sorting-strategy
+             '(todo-state-down effort-up category-keep))))
+  
+          ("p" "Projects" tags-todo "-HOLD-CANCELLED/!"
+           ((org-agenda-overriding-header "Projects")
+            
+            (org-agenda-sorting-strategy
+             '(category-keep))))
+          
+          ("w" "Work" tags-todo "WORK")
+          
+          (" " "Agenda"
+           ((agenda " " nil)
+            (tags "REFILE"
+                  ((org-agenda-overriding-header "Tasks to Refile")
+                   (org-tags-match-list-sublevels nil)))
+            (tags-todo "-CALCELED/!NEXT"
+                       ((org-agenda-overriding-header "Tasks to Next")))
+            ,(work-in-turris
+              '(tags-todo "WORK"
+                         ((org-agenda-overriding-header "Task of ")
+                          (org-tags-match-list-sublevels nil))))
+            ,(work-in-turris
+              '(tags-todo "TRAC"
+                         ((org-agenda-overriding-header "Tickets")
+                          (org-tags-match-list-sublevels nil))))))
+          ))
+  
+#+END_SRC
+
+* TODO
+** todo state
+:PROPERTIES:
+:MTIME: 1325088978
+:MTIME-1: <2011-12-29 木 01:16:18>
+:END:
+
+タスクの状態は全部で4．
+
+- TODO: 未開始のタスク
+- NEXT: 開始したタスク
+- DONE: 終了したタスク
+- CANCELED: キャンセルしたタスク
+- WAITING: 連絡待ち，作業待ちなどで待機しているタスク 
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-todo-keywords
+        (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!/!)")
+                (sequence "WAITING(w@/!)" "CANCELLED(c@/!)"))))
+  
+  (setq org-todo-keyword-faces 
+        (quote (("TODO" :foreground "red" :weight bold)
+                ("NEXT" :foreground "cyan" :weight bold)
+                ("DONE" :foreground "green" :weight bold)
+                ("CANCELLED" :foreground "forest green" :weight bold))))
+#+END_SRC
+
+#+BEGIN_SRC plantuml :file transition-todo-state.png
+
+[*] --> TODO
+TODO : t
+TODO -right-> DONE
+TODO -right-> NEXT
+TODO -down-> CANCELED
+TODO -down-> WAITING
+
+STARTED : s
+
+STARTED --> DONE
+STARTED --> CANCELED
+STARTED --> WAITING
+
+CANCELED : c
+
+WAITING : w
+WAITING --> NEXT
+WAITING --> DONE
+
+DONE : d
+DONE --> [*]
+#+END_SRC
+
+#+results:
+[[file:transition-todo-state.png]]
+#+CAPTION: Transition TODO state
+#+ATTR_HTML: alt="transition-todo-state image" title="Action!" align="right"
+
+** auto-set tag with todo state
+:PROPERTIES:
+:Modified: 1323682342
+:Modified-1: <2011-12-12 月 18:32:22>
+:MTIME: 1325088905
+:MTIME-1: <2011-12-29 木 01:15:05>
+:END:
+
+タスクの状態によって自動的にタグをセットする．
+
+- 状態がCANCELLED: CANCELLEDタグをセット
+- それ以外: CANCELLEDタグを外す
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-todo-state-tags-triggers
+        (quote (("CANCELLED" ("CANCELLED" . t))
+                ("WAITING" ("WAITING" . t))
+                ("TODO" ("CANCELLED") ("WAITING"))
+                ("NEXT" ("CANCELLED") ("WITING"))
+                ("DONE" ("CANCELLED") ("WAIING")))))
+  
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-return-follows-link t)
+  (setq org-archive-mark-done nil)
+#+END_SRC
+** habit
+:PROPERTIES:
+:MTIME: 1324260809
+:MTIME-1: <2011-12-19 月 11:13:29>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-modules 'org-habit)
+#+END_SRC
+** タスクが完了した時、その時刻をLOGBOOKドロワーに記録する
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer "LOGBOOK")
+#+END_SRC
+
+** TODOタスクに依存性を持たせる
+:PROPERTIES:
+:MTIME: 1324266386
+:MTIME-1: <2011-12-19 月 12:46:26>
+:END:
+
+org-enforce-todo-dependenciesがtだと，タスクに依存関係が生まれ，
+依存タスクを全て完了しないとタスクの完了ができなくなる．ORDEREDプ
+ロパティがない場合は，親タスクが子タスクの完了に依存する．ORDERED
+プロパティがtの場合は，子タスク間にも依存関係が生じ，上にあるタス
+クに依存する．ORDEREDプロパティをセットするには，"C-c C-x o"を使
+う．
+
+#+BEGIN_SRC org
+  ,* TODO 親タスク(子タスクを全て完了しないと完了できない)
+  ,** TODO 子タスクA
+  ,** TODO 子タスクB
+  
+  ,* TODO 親タスク(子タスクを全て完了しないと完了できない)
+  ,  :PROPERTIES:
+  ,  :ORDERED:  t
+  ,  :END:
+  ,** TODO A
+  ,** TODO B(タスクAが完了しないと完了できない)
+  ,** TODO C(タスクAとタスクBが完了しないと完了できない)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-enforce-todo-dependencies t)
+#+END_SRC
+* 時間計測
+** 雑多な設定
+
+#+BEGIN_SRC emacs-lisp
+  ;; Emacsが再起動した時に測定中タスクの測定を再開する
+  (org-clock-persistence-insinuate)
+  
+  ;: 時間測定の履歴数
+  (setq org-clock-history-length 36)
+  
+  ;; ドロワーを分割する
+  (setq org-drawer (quote ("PROPERTIES" "LOGBOK")))
+  
+  ;; Emacsが再起動したときにタスクの時間計測を再開する
+  (setq org-clock-persist 'history)
+  
+  ;; タスクが完了した時に時間測定も停止する
+  (setq org-clock-out-when-done t)
+  
+  ;; Emacsが終了する時に測定中の計測と全ての測定履歴を保存する
+  (setq org-clock-persist t)
+  
+  ;; セレクションメニューから状態の変更を行えるようにする
+  (setq org-use-fast-todo-selection t)
+
+  (setq org-clock-in-resume t)
+
+  (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
+
+  ;; 測定した時間が0の場合消去する
+  (setq org-clock-out-remove-zero-time-clocks t)
+
+  ;;アジェンダのclockreport用パラメータ
+  (setq org-agenda-clockreport-parameter-plist
+        '(:maxlevel 5 :block t :tstart t :tend t :emphasize t :link t :narrow 80 :indent t :formula nil :timestamp t :level 5 :tcolumns nil :formatter nil))
+
+  ;; カラムビューで表示する項目
+  (setq org-columns-default-format "%80ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM")
+#+END_SRC
+** タスクの時間計測を開始した時に，自動的にタスクの状態をSTARTEDに変更する
+:PROPERTIES:
+:Modified: 1323682891
+:Modified-1: <2011-12-12 月 18:41:31>
+:MTIME: 1324266402
+:MTIME-1: <2011-12-19 月 12:46:42>
+:END:
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-clock-in-switch-to-state 'org-clock-in-to-started)
+  
+  (defun org-clock-in-to-started (state)
+    (if (string= state "TODO") "NEXT"))
+#+END_SRC
+
+#+RESULTS:
+: org-clock-in-to-started
+
+** 時間の測定を始める
+
+C-c C-x C-iもしくはI(Agenda内のみ)
+
+** 仕事の開始時刻と終了時刻を記録する
+
+#+BEGIN_SRC emacs-lisp
+  
+  (setq bh/keep-clock-running nil)
+  
+  (defun bh/clock-in-to-next (kw)
+    "Switch a task from TODO to NEXT when clocking in.
+  Skips capture tasks, projects, and subprojects.
+  Switch projects and subprojects from NEXT back to TODO"
+    (when (not (and (boundp 'org-capture-mode) org-capture-mode))
+      (cond
+       ((and (member (org-get-todo-state) (list "TODO"))
+             (bh/is-task-p))
+        "NEXT")
+       ((and (member (org-get-todo-state) (list "NEXT"))
+             (bh/is-project-p))
+        "TODO"))))
+  
+  (defun bh/find-project-task ()
+    "Move point to the parent (project) task if any"
+    (save-restriction
+      (widen)
+      (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+        (while (org-up-heading-safe)
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq parent-task (point))))
+        (goto-char parent-task)
+        parent-task)))
+  
+  (defun bh/punch-in (arg)
+    "Start continuous clocking and set the default task to the
+  selected task.  If no task is selected set the Organization task
+  as the default task."
+    (interactive "p")
+    (setq bh/keep-clock-running t)
+    (ad-deactivate-regexp "is-set-effort-before-clock-in")
+    (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
+    (if (equal major-mode 'org-agenda-mode)
+        ;;
+        ;; We're in the agenda
+        ;;
+        (let* ((marker (org-get-at-bol 'org-hd-marker))
+               (tags (org-with-point-at marker (org-get-tags-at))))
+          (if (and (eq arg 4) tags)
+              (org-agenda-clock-in '(16))
+            (bh/clock-in-organization-task-as-default)))
+      ;;
+      ;; We are not in the agenda
+      ;;
+      (save-restriction
+        (widen)
+        ; Find the tags on the current task
+        (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
+            (org-clock-in '(16))
+          (bh/clock-in-organization-task-as-default))))
+    (ad-activate-regexp "is-set-effort-before-clock-in")
+    (add-hook 'org-clock-in-hook 'org-pomodoro-start))
+  
+  (defun bh/punch-out ()
+    (interactive)
+    (setq bh/keep-clock-running nil)
+    (when (org-clock-is-active)
+      (org-clock-out))
+    (org-agenda-remove-restriction-lock))
+  
+  (defun bh/clock-in-default-task ()
+    (save-excursion
+      (org-with-point-at org-clock-default-task
+        (ad-deactivate-regexp "is-set-effort-before-clock-in")
+        (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
+        (org-clock-in)
+        (ad-activate-regexp "is-set-effort-before-clock-in")
+        (add-hook 'org-clock-in-hook 'org-pomodoro-start))))
+  
+  (defun bh/clock-in-parent-task ()
+    "Move point to the parent (project) task if any and clock in"
+    (let ((parent-task))
+      (save-excursion
+        (save-restriction
+          (widen)
+          (while (and (not parent-task) (org-up-heading-safe))
+            (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+              (setq parent-task (point))))
+          (if parent-task
+              (org-with-point-at parent-task
+                (org-clock-in))
+            (when bh/keep-clock-running
+              (bh/clock-in-default-task)))))))
+  
+  (work-in-turris
+   (defvar bh/organization-task-id "6682f0b0-d6a6-43f2-82de-323a2e53fe93"))
+  
+  (defun bh/clock-in-organization-task-as-default ()
+    (interactive)
+    (org-with-point-at (org-id-find bh/organization-task-id 'marker)
+      (ad-deactivate-regexp "is-set-effort-before-clock-in")
+      (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
+      (org-clock-in '(16))
+      (ad-activate-regexp "is-set-effort-before-clock-in")
+      (add-hook 'org-clock-in-hook 'org-pomodoro-start)))
+  
+  (defun bh/clock-out-maybe ()
+    (when (and bh/keep-clock-running
+               (not org-clock-clocking-in)
+               (marker-buffer org-clock-default-task)
+               (not org-clock-resolving-clocks-due-to-idleness))
+      (bh/clock-in-parent-task)))
+  
+  (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
+  
+#+END_SRC
+
+** 時間計測を開始する前に必ず見積りを行う
+
+
+#+BEGIN_SRC emacs-lisp
+  (defadvice org-clock-in (before is-set-effort-before-clock-in)
+    (let ((effort (org-entry-get (point) "Effort")))
+      (unless effort
+        (error "[Error: Is not set a effort!]"))))
+  
+  (ad-activate-regexp "is-set-effort-before-clock-in")
+  
+  
+#+END_SRC
+
+* org-capture
+:PROPERTIES:
+:Modified: 1323683465
+:Modified-1: <2011-12-12 月 18:51:05>
+:END:
+
+#+BEGIN_SRC emacs-lisp
+  (define-key global-map "\C-cc" 'org-capture)
+  
+  (setq org-completion-use-helm nil)
+  
+  (setq org-refile-path
+        (if (or run-mac (string= (system-name) "ubuntu"))
+            "~/Documents/refile.org"
+            "~/doc/refile.org"))
+  
+  (defun get-category-from-description (desc)
+    (if (string-match "#\\([0-9]+\\) .*" desc)
+         (match-string 1 desc)))
+  
+  (setq org-capture-templates
+        `(("t" "todo" entry (file org-refile-path "")
+           "* TODO %?\n%U\n%a\n  %i" :clock-in t :clock-resume t)
+          ("p" "Phone call" entry (file "~/doc/refile.org")
+           "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+          ("n" "note" entry (file org-refile-path  "")
+           "* %? :NOTE:\n  %u" :clock-in t :clock-resume t)
+          ("j" "journal" entry (file+datetree "~/doc/diary.org")
+           "* %?\n%U\n  %i" :clock-in t :clock-resume t)
+          ("h" "Habit" entry (file "~/doc/refile.org")
+           "* NEXT %?\n%a\nSCHEDULED: %t .+d/3d\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
+          ;;("b" "Bookmark" entry (file+headline "~/trac.org" "Bugs of Trac")
+          ("b" "Bookmark" entry (file+headline "~/work/trac.org" (plist-get (plist-get org-store-link-plist :query) :milestone))
+           "* TODO %:description
+  :PROPERTIES:
+  :CATEGORY: %(get-category-from-description %:description)
+  :ID: %(plist-get (plist-get org-store-link-plist :query) :ticket-id)
+  :CUSTOMER: %(plist-get (plist-get org-store-link-plist :query) :customer)
+  :URL: %:link
+  :END:
+  
+  " :immediate-finish t)
+  
+          ("d" "daily report" entry (file+datetree "~/work/daily-report.org")
+           "* %?")
+  
+          ("w" "weekly report" entry (file+datetree "~/work/weekly-report.org")
+           "* %?")
+  
+          ))
+  
+  (defun in-turris ()
+    (string= "turris" (system-name)))
+        
+  (setq org-capture-templates-contexts
+        '(("d" (in-turris))
+          ("w" (in-turris))))
+#+END_SRC
+
+#+RESULTS:
+| key |               |       |                                         |                                                                                                   |           |   |               |   | context      |
+|-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
+| t   | todo          | entry | (file ~/doc/refile.org )                | * TODO %?\n%U\n%a\n  %i                                                                           |           |   |               |   |              |
+| n   | note          | entry | (file ~/doc/refile.org )                | * %? :NOTE:\n  %u                                                                                 | :clock-in | t | :clock-resume | t |              |
+| j   | journal       | entry | (file+datetree ~/doc/diary.org)         | * %?\n%U\n  %i                                                                                    | :clock-in | t | :clock-resume | t |              |
+| h   | Habit         | entry | (file ~/doc/refile.org)                 | * NEXT %?\n%a\nSCHEDULED: %t .+d/3d\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n |           |   |               |   |              |
+|-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
+| d   | daily report  | entry | (file+datetree ~/doc/daily-report.org)  |                                                                                                   |           |   |               |   | アリエル社内 |
+| w   | weekly report | entry | (file+datetree ~/doc/weekly-report.org) |                                                                                                   |           |   |               |   | アリエル社内 |
+|-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
+
+#+BEGIN_SRC javascript
+  javascript:location.href='org-protocol://capture://b/'+encodeURIComponent(location.href)+'/'+encodeURIComponent(document.title)+'/'+encodeURIComponent(document.evaluate('descendant::a[@class="milestone"]',%20document,%20null,%20XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,%20null).snapshotItem(0).innerHTML)
+#+END_SRC
+
+** 
+:PROPERTIES:
+:Modified: 1323683199
+:Modified-1: <2011-12-12 月 18:46:39>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-modules 'org-timer)
+  
+  (setq org-timer-default-timer 25)
+  
+  (setq org-startup-indented t)
+  
+  ;; (add-to-list 'load-path "~/code/elisp/org-simple-presentation/")
+  ;; (require 'org-simple-presentation-mode)
+  
+  #+END_SRC
+
+#+BEGIN_SRC emacs-lisp  
+  ;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-calfw")
+  ;; (require 'calfw)
+  ;; (require 'calfw-org)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/Dropbox/code/elisp/org-book")
+  (require 'org-book)
+  (setq *org-book-file* "~/Dropbox/doc/book.org")
+  (setq *org-book-amazon.rb-directory* "~/Dropbox/code/elisp/org-book")
+#+END_SRC
+
+* refile
+:PROPERTIES:
+:Modified: 1323682976
+:Modified-1: <2011-12-12 月 18:42:56>
+:END:
+
+  #+BEGIN_SRC emacs-lisp
+    (setq org-refile-targets (quote ((nil :maxlevel . 3)
+                                     (org-agenda-files :maxlevel . 3))))
+    
+    
+    (setq org-outline-path-complete-in-steps nil)
+    
+    (setq org-refile-allow-creating-parent-nodes (quote confirm))
+  #+END_SRC
+
+** リファイルのターゲットをパス形式で選択する
+
+- nilでなければパスのようなリファイルターゲットを提供する．
+- fileならファイル名からターゲットとして選択できる
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-refile-use-outline-path 'file)
+#+END_SRC
+  
+* export
+:PROPERTIES:
+:Modified: 1323683375
+:Modified-1: <2011-12-12 月 18:49:35>
+:END:
+** 初期化
+#+BEGIN_SRC emacs-lisp
+  (setq  org-export-latex-classes '())
+#+END_SRC
+
+** ゼミ報告書
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-export-latex-classes
+               ;; ゼミの報告書用
+               '("seminar" "
+  \\documentclass[11pt]{jsarticle}
+  \\usepackage{seminar}
+  \\usepackage[utf8]{inputenc}
+  \\usepackage[T1]{fontenc}
+  \\usepackage{fixltx2e}
+  \\usepackage[dvipdfmx]{graphicx}
+  \\usepackage{longtable}
+  \\usepackage{float}
+  \\usepackage{wrapfig}
+  \\usepackage{soul}
+  \\usepackage{t1enc}
+  \\usepackage{textcomp}
+  \\usepackage{marvosym}
+  \\usepackage{wasysym}
+  \\usepackage{latexsym}
+  \\usepackage{amssymb}
+  \\usepackage{hyperref}
+  \\usepackage{ascmac}
+  "
+                  ("\\section{%s}" . "\\section*{%s}")
+                  ("\\subsection{%s}" . "\\subsection*{%s}")
+                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+#+END_SRC
+** レジュメ
+:PROPERTIES:
+:Modified: 1323682296
+:Modified-1: <2011-12-12 月 18:31:36>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-export-latex-classes
+               '("resume"
+                 "
+  \\documentclass[a4paper, 10pt, twocolumn]{jarticle}
+  \\usepackage{rise}
+  \\usepackage{hyperref}
+  \\usepackage{fancyheadings}
+  \\usepackage[dvipdfmx]{graphicx}
+  \\usepackage{amsmath}
+  \\setlength{\\textheight}{47\\baselineskip}
+  \\addtolength{\\textheight}{\\topskip}
+  \\setlength{\\voffset}{-0.5in}
+  \\setlength{\\headsep}{0.3in}
+  "
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+    
+#+END_SRC
+
+** スライド
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-export-latex-classes
+    '("beamer"
+  "
+  \\documentclass[12pt]{beamer}
+  \\usetheme{Pittsburgh}
+  \\setbeamersize{text margin left=10pt,text margin right=10pt}
+  "
+  org-beamer-sectioning
+  ))
+  
+  
+  (add-to-list 'org-export-latex-classes
+    '("slide2"
+      "\\documentclass[17pt,compress,dvipdfm]{beamer}"
+      org-beamer-sectioning
+  ))
+  
+  
+#+END_SRC
+** 修論
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-export-latex-classes
+        (cons
+         '("thesis" "
+  \\documentclass{risepaper}
+  \\修論
+  \\usepackage{epsbox}
+   \\usepackage{makeidx}
+  \\usepackage[dvipdfmx]{graphicx}
+  \\usepackage[utf8]{inputenc}
+  \\usepackage[T1]{fontenc}
+  \\usepackage{hyperref}
+  \\usepackage{multirow}
+  \\usepackage{amsmath}
+  \\usepackage{listings, jlisting}
+  \\renewcommand{\\lstlistingname}{リスト}
+  \\lstset{language=bash,
+    basicstyle=\\ttfamily\\tiny,
+    commentstyle=\\textit,
+    classoffset=1,
+    keywordstyle=\\bfseries,
+    frame=tRBl,
+    framesep=5pt,
+    showstringspaces=false,
+    tabsize=2
+  }
+  \\makeindex
+  "
+           ("\\chapter{%s}" . "\\chapter*{%s}")
+           ("\\section{%s}" . "\\section*{%s}")
+           ("\\subsection{%s}" . "\\subsection*{%s}"))
+         org-export-latex-classes))
+#+END_SRC
+** その他文書
+:PROPERTIES:
+:Modified: 1323682263
+:Modified-1: <2011-12-12 月 18:31:03>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-export-latex-classes
+               '("jsarticle" "
+  \\documentclass[a4paper]{jsarticle}
+  \\usepackage[utf8]{inputenc}
+  \\usepackage[T1]{fontenc}
+  \\usepackage[dvipdfmx]{graphicx}
+  \\usepackage{longtable}
+  \\usepackage{hyperref}
+  "
+                  ("\\section{%s}" . "\\section*{%s}")
+                  ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+  
+#+END_SRC
+
+* publish
+** config
+#+BEGIN_SRC emacs-lisp
+  (setq org-export-default-language "en"
+        org-export-html-extension "html"
+        org-export-with-timestamps nil
+        org-export-with-section-numbers nil
+        org-export-with-tags 'not-in-toc
+        org-export-skip-text-before-1st-heading nil
+        org-export-with-sub-superscripts '{}
+        org-export-with-LaTeX-fragments t
+        org-export-with-archived-trees nil
+        org-export-highlight-first-table-line t
+        org-export-latex-listings-w-names nil
+        org-export-html-style-include-default nil
+        org-export-htmlize-output-type 'css
+        org-startup-folded nil
+        org-publish-list-skipped-files t
+        org-publish-use-timestamps-flag t
+        org-export-babel-evaluate nil
+        org-confirm-babel-evaluate nil)
+#+END_SRC
+** repl.info
+:PROPERTIES:
+:MTIME: 1324453922
+:MTIME-1: <2011-12-21 水 16:52:02>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (setq org-publish-project-alist nil)
+  (add-to-list 'org-publish-project-alist
+               '("anor.in-doc"
+                 :base-directory "~/Dropbox/org/private/www/anor.in/"
+                 :base-extension "org"
+                 :publishing-directory "/ssh:rtak@repl.info:/var/www/anor.in/"
+                 :recursive t
+                 :publishing-function org-publish-org-to-html
+                 :headline-levels 4
+                 :auto-preamble t
+                 :auto-index t
+                 :index-filename "sitemap.org"
+                 :index-title "Sitemap"
+                 :auto-sitemap t
+                 :section-numbers nil
+                 :table-of-contents nil
+                 :plain-source t
+                 :htmlized-source t
+                 :makeindex t
+                 :style-include-default nil
+                 :style "<link rel=\"stylesheet\" type=\"text/css\" href=\"/style/style.css\">\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/style/source.css\">"
+                 :fb-button t
+                 :google-analytics-tracking-code "UA-27642412-1"
+                 ))
+  (add-to-list 'org-publish-project-alist
+               '("anor.in-extra"
+                 :base-directory "~/Dropbox/org/private/www/anor.in/"
+                 :publishing-directory "/ssh:rtak@repl.info:/var/www/anor.in/"
+                 :base-extension "css\\|pdf\\|png\\|jpg\\|gif\\|txt\\|js\\|scm"
+                 :publishing-function org-publish-attachment
+                 :recursive t))
+  (add-to-list 'org-publish-project-alist
+               '("anor.in"
+                 :components ("anor.in-doc" "anor.in-extra")))
+#+END_SRC
+** local.repl.info
+:PROPERTIES:
+:MTIME: 1324453922
+:MTIME-1: <2011-12-21 水 16:52:02>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (setq org-publish-project-alist nil)
+  (add-to-list 'org-publish-project-alist
+               '("local.anor.in-doc"
+                 :base-directory "~/Dropbox/org/private/www/anor.in/"
+                 :base-extension "org"
+                 :publishing-directory "/var/www/repl.info/"
+                 :recursive t
+                 :publishing-function org-publish-org-to-html
+                 :headline-levels 4
+                 :auto-preamble t
+                 :auto-index t
+                 :index-filename "sitemap.org"
+                 :index-title "Sitemap"
+                 :auto-sitemap t
+                 :section-numbers nil
+                 :table-of-contents nil
+                 :plain-source t
+                 :htmlized-source t
+                 :makeindex t
+                 :style-include-default nil
+                 :style "<link rel=\"stylesheet\" type=\"text/css\" href=\"/style/style.css\">\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/style/source.css\">"
+                 :fb-button t
+                 :google-analytics-tracking-code "UA-27642412-1"
+                 ))
+  (add-to-list 'org-publish-project-alist
+               '("local.anor.in-extra"
+                 :base-directory "~/Dropbox/org/private/www/anor.in/"
+                 :publishing-directory "/var/www/repl.info/"
+                 :base-extension "css\\|pdf\\|png\\|jpg\\|gif\\|txt\\|js\\|scm"
+                 :publishing-function org-publish-attachment
+                 :recursive t))
+  (add-to-list 'org-publish-project-alist
+               '("local.anor.in"
+                 :components ("local.anor.in-doc" "local.anor.in-extra")))
+#+END_SRC
+** blog.repl.info
+:PROPERTIES:
+:MTIME: 1324257203
+:MTIME-1: <2011-12-19 月 10:13:23>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-publish-project-alist
+               '("my-blog"
+                  :base-directory "~/blog.repl.info/source/drafts"
+                  :recursive t
+                  :base-extension "org"
+                  :publishing-directory "~/blog.repl.info/source/_posts"
+                  :blog-publishing-directory "~/blog.repl.info/source/_posts"
+                  :site-root "http://blog.repl.info/"
+                  :jekyll-sanitize-permalinks t
+                  :publishing-function org-publish-org-to-html
+                  :section-numbers nil
+                  :headline-levels 4
+                  :table-of-contents t
+                  :auto-index nil
+                  :auto-preamble nil
+                  :body-only t
+                  :auto-postamble nil))
+  
+#+END_SRC
+** orgmode.jp
+:PROPERTIES:
+:MTIME: 1324257493
+:MTIME-1: <2011-12-19 月 10:18:13>
+:END:
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-publish-project-alist
+               '("orgmode.jp-doc"
+                 :base-directory "~/Dropbox/org/private/www/orgmode.jp/"
+                 :base-extension "org"
+                 :publishing-directory "/ssh:rtakaishi@orgmode.jp:/var/www/orgmode.jp/"
+                 :recursive t
+                 :publishing-function org-publish-org-to-html
+                 :headline-levels 4
+                 :auto-preamble t
+                 :auto-index t
+                 :index-filename "sitemap.org"
+                 :index-title "Sitemap"
+                 :auto-sitemap t
+                 :section-numbers nil
+                 :table-of-contents nil
+                 :plain-source t
+                 :htmlized-source t
+                 :makeindex t
+                 :style "<link rel=\"stylesheet\" title=\"Standard\" href=\"/style\/style.css\" type=\"text/css\" />"
+                 ))
+  
+  (add-to-list 'org-publish-project-alist
+               '("orgmode.jp-extra"
+                 :base-directory "~/Dropbox/org/private/www/orgmode.jp/"
+                 :publishing-directory "/ssh:rtakaishi@orgmode.jp:/var/www/orgmode.jp/"
+                 :base-extension "css\\|pdf\\|png\\|jpg\\|gif\\|txt\\|js\\|scm\\|texi\\|html"
+                 :publishing-function org-publish-attachment
+                 :recursive t))
+  
+  (add-to-list 'org-publish-project-alist
+               '("orgmode.jp"
+                 :components ("orgmode.jp-doc" "orgmode.jp-extra")))
+  
+#+END_SRC
+* Babel
+:PROPERTIES:
+:Modified: 1323682214
+:Modified-1: <2011-12-12 月 18:30:14>
+:MTIME: 1323683959
+:MTIME-1: <2011-12-12 月 18:59:19>
+:END:
+#+BEGIN_SRC emacs-lisp
+  ;; (load "~/code/elisp/ob-blockdiag.el")
+  ;;   (org-babel-do-load-languages
+  ;;    'org-babel-load-languages
+  ;;    '(;; other Babel languages
+  ;;      (plantuml . t)
+  ;;      (dot . t)
+  ;;      (ruby . t)
+  ;;      (blockdiag . t)))
+    
+  ;;   (setq org-plantuml-jar-path
+  ;;         (expand-file-name "~/bin/plantuml.jar"))
+  ;;   (setq plantuml-jar-path (expand-file-name "~/bin/plantuml.jar"))
+    
+    
+    (require 'ob-dot)
+#+END_SRC
+
+** auto-save-buffersが有効だと衝突する問題を回避する
+:PROPERTIES:
+:Modified: 1323681947
+:Modified-1: <2011-12-12 月 18:25:47>
+:MTIME: 1324372118
+:MTIME-1: <2011-12-20 火 18:08:38>
+:END:
+
+C-c ' (org-edit-speclal)でコードを別バッファに表示・編集できる．
+その際元バッファでorg-save-buffersが有効になっていると編集中に以下のメッセージがミニバッファに表示されて操作に支障が生じる．
+
+: (ファイル名) has changed since visited or saved.  Save anyway? (yes or no) 
+
+これを解決するために，編集開始時にauto-save-buffersをオフにし，編集終了時にオンにすることにした．
+
+#+BEGIN_SRC emacs-lisp
+  ;; C-c ' でコードの編集をする際，auto-save-buffersが有効になっていると衝突を起こす
+  ;; 編集時に無効にし，編集が終わると有効にする
+  (defadvice org-edit-special (before turn-off-auto-save-buffers)
+    "turn-off-auto-revert-mode with org-edit-special."
+    (if auto-save-buffers-active-p
+        (auto-save-buffers-toggle)))
+  
+  (defadvice org-edit-src-exit (after turn-on-auto-save-buffers)
+    (unless auto-save-buffers-active-p
+      (auto-save-buffers-toggle)))
+  
+  (ad-activate-regexp "turn-off-auto-save-buffers")
+  (ad-activate-regexp "turn-on-auto-save-buffers")
+#+END_SRC
+
+* org-extension.el
+:PROPERTIES:
+:MTIME: 1324427807
+:MTIME-1: <2011-12-21 水 09:36:47>
+:END:
+
+#+BEGIN_SRC emacs-lisp
+  ;;(require 'org-extension)
+#+END_SRC
+
+* ヘッダの最終更新時刻を記録する
+:PROPERTIES:
+:Modified: 1323683300
+:Modified-1: <2011-12-12 月 18:48:20>
+:MTIME: 1325219186
+:MTIME-1: <2011-12-30 金 13:26:26>
+:END:
+
+global-highlight-changes-modeを使うと，バッファ内の更新した部分を
+知ることができる．これを使って，各ヘッダのプロパティに最終更新時
+刻を記録する．
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-record-header-mtime ()
+    "If mode-name is 'Org', update  modified heading's drawer :Modified:.
+  This function is global-highlight-changes-mode. "
+    (interactive)
+    (when (and (stringp mode-name)
+               (string= mode-name "Org") global-highlight-changes-mode)
+      (save-excursion
+        (goto-char (point-min))
+        (while (integerp (highlight-changes-next-change))
+          (org-touch-header)))
+      (highlight-changes-remove-highlight (point-min) (point-max))))
+  
+  ;; This function ports by Sacha's org-toodledo.el.
+  ;; URL: http://github.com/sachac/org-toodledo
+  (defun org-touch-header ()
+    "Update the current task."
+    (interactive)
+    (let ((time (current-time)))
+      (org-entry-put (point) "MTIME" (format "%d" (float-time time)))
+      (org-entry-put (point) "MTIME-1" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" time))))
+  
+  ;;(add-hook 'org-mode-hook '(lambda () (global-highlight-changes-mode t)))
+  ;;(remove-hook 'org-mode-hook '(lambda () (global-highlight-changes-mode t)))
+  ;;(add-hook 'after-save-hook 'org-record-header-mtime)
+  ;;(remove-hook 'after-save-hook 'org-record-header-mtime)
+#+END_SRC
+
+* FacebookのLikeボタンを挿入
+:PROPERTIES:
+:MTIME: 1323701101
+:MTIME-1: <2011-12-12 月 23:45:01>
+:END:
+
+Ported from [[https://github.com/aldrin/ajd/blob/master/dotfiles/elisp/ajd-org.el][dotfiles/elisp/ajd-org.el at master from aldrin/ajd -
+GitHub]].
+#+BEGIN_SRC emacs-lisp
+  (defun org-publish-get-project-from-publish-filename (filename)
+    (let* ((path filename)
+           (prj org-publish-project-alist))
+      (loop for p in prj
+            when (and (string< (plist-get (cdr p) :publishing-directory) path)
+                      (string= (plist-get (cdr p) :base-extension) "org"))
+            return p)))
+  
+  (defun add-fb-stuff ()
+      "Adds Facebook OpenGraph Plugins."
+      (let* ((project (org-publish-get-project-from-publish-filename (buffer-file-name)))
+             (project-plist (cdr project)))
+        (when (plist-get project-plist :fb-button)
+          (let ((url (concat "http://repl.info/"
+                             (replace-regexp-in-string (plist-get project-plist :publishing-directory)
+                                                       ""
+                                                       (buffer-file-name)))))
+            (goto-char (point-min))
+            (search-forward "<body>")
+            (insert (concat
+                     "<div class=\"fb-like\" data-href=\""
+                     url
+                     "\" data-send=\"false\" data-layout=\"button_count\" data-width=\"30\" data-show-faces=\"true\" data-font=\"arial\"></div>"))
+            (goto-char (point-min))
+            (search-forward "<body>")
+            (insert "<div id=\"fb-root\"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = \"//connect.facebook.net/ja_JP/all.js#xfbml=1\";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>")
+            (save-buffer)))))
+    
+  (add-hook 'org-publish-after-export-hook 'add-fb-stuff)
+  
+#+END_SRC
+
+* Google analyticsのトラッキングコードを挿入
+:PROPERTIES:
+:MTIME: 1325219186
+:MTIME-1: <2011-12-30 金 13:26:26>
+:END:
+
+Ported from [[https://github.com/aldrin/ajd/blob/master/dotfiles/elisp/ajd-org.el][dotfiles/elisp/ajd-org.el at master from aldrin/ajd -
+GitHub]].
+#+BEGIN_SRC emacs-lisp
+  (setq add-google-analytics-suffix "']);
+  _gaq.push(['_trackPageview']);
+  
+  (function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  </script>
+  <script type='text/javascript' src='https://apis.google.com/js/plusone.js'></script>
+  ")
+  
+  (defun add-google-analytics ()
+    "Adds Google Analytics Tracking code."
+    (let* ((project-plist (cdr (org-publish-get-project-from-publish-filename (buffer-file-name))))
+           (code (plist-get project-plist :google-analytics-tracking-code)))
+      (when code
+        (goto-char (point-min))
+        (re-search-forward "</head>")
+        (goto-char (match-beginning 0))
+        (insert (concat "
+  <script type='text/javascript'>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', '" code add-google-analytics-suffix))
+    (save-buffer))))
+  
+    (add-hook 'org-publish-after-export-hook 'add-google-analytics)
+  
+#+END_SRC
+
+* Mobileorg
+
+#+BEGIN_SRC emacs-lisp
+    
+  (setq org-mobile-directory "~/Dropbox/doc")
+  (setq org-directory "~/Dropbox/doc")
+  (setq org-mobile-inbox-for-pull "~/Dropbox/doc/from-mobile.org")
+#+END_SRC
+* o-blog
+
+#+BEGIN_SRC emacs-lisp
+;;  (add-to-list 'load-path "~/.emacs.d/el-get/o-blog")
+;;  (require 'o-blog)
+#+END_SRC
+* The Pomodoro Technique
+
+The Pomodoro Technique is a time management method.
+It uses a timer to get down 25 minute called '1 pomodoro'.
+Datail is [[http://www.pomodorotechnique.com/][The Pomodoro Technique®]].
+
+#+BEGIN_SRC emacs-lisp
+  (require 'org-timer)
+  
+  (setq org-timer-default-timer 25)
+  
+  (defun org-pomodoro-start ()
+    (if (not org-timer-current-timer)
+        (org-timer-set-timer '(16))))
+  
+  (defun org-pomodoro-stop ()
+    (org-timer-cancel-timer))
+  
+  
+  (add-hook 'org-clock-in-hook 'org-pomodoro-start)
+  
+  ;; When a task is complete within 25 minutes, it cancel org-timer together.
+  (add-hook 'org-clock-out-hook 'org-pomodoro-stop)
+#+END_SRC
+
+* org-sync
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/Document/code/elisp/org-sync")
+  (add-to-list 'load-path "~/Dropbox/code/elisp/org-sync")
+  (mapc 'load
+        '("org-element" "os" "os-bb" "os-github" "os-rmine" "os-trac"))
+  
+#+END_SRC
+* protocol
+
+#+BEGIN_SRC emacs-lisp
+  (require 'org-protocol)
+#+END_SRC
+* thunderlink
+
+Thunderlinkという、MessageIDを指定してコマンドラインからメールを開くためのThunderbird用アドオンがある。
+このアドオンを使って、org-modeからメールをMessageIDから開くための設定。
+
+#+BEGIN_SRC emacs-lisp
+  (org-add-link-type "thunderlink" 'org-thunderlink-open)
+  (defun org-thunderlink-open (path &optional new-window)
+    (let ((url (concat "thunderlink:" path)))
+      (if (string-match "^thunderlink://" url)
+          (progn
+            (start-process (concat "thunderbird " url) nil "thunderbird-bin" "-thunderlink" url)
+            t)
+        nil)
+      )
+    )
+#+END_SRC
+

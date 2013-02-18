@@ -1,0 +1,11 @@
+#+BEGIN_SRC emacs-lisp
+  (el-get 'sync 'scala-mode2)
+  (el-get 'sync 'ensime)
+  
+  (require 'scala-mode2)
+  (add-to-list 'auto-mode-alist '("\\.scala$" . scala-mode))
+  
+  (require 'ensime)
+  (add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
+  
+#+END_SRC

@@ -1,0 +1,200 @@
+#+TITLE: その他の設定
+#+AUTHOR: Ryo Takaishi
+#+LINK_HOME: http://repl.info/
+#+LINK_UP: http://repl.info/emacs/config/
+#+OPTIONS: toc:nil author:nil creator:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="/style/style.css">
+#+STYLE: <script type="text/javascript" src="./jquery-1.4.2.js"></script> <script type="text/javascript" src="./jquery.timer.js"></script><script type="text/javascript" src="./my.js"></script>
+
+* バッファ全体をインデントする
+
+#+BEGIN_SRC emacs-lisp
+  (defun indent-buffer ()
+    (interactive)
+    (let ((beg (point-min))
+          (end (point-max)))
+      (indent-region beg end)))
+#+END_SRC
+* hl-line
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'hl-line+)
+  ;; (toggle-hl-line-when-idle)
+  ;; (set-face-background 'hl-line "gray60")
+  ;; (set-face-foreground 'hl-line "white")
+#+END_SRC
+  
+* 
+** バックアップファイルを作成しない
+
+   #+BEGIN_SRC emacs-lisp
+     (setq backup-inhibited t)
+        
+   #+END_SRC
+** ビープ音を消す
+  #+BEGIN_SRC emacs-lisp
+  (setq visible-bell t)
+#+END_SRC
+
+** スタートアップ時のメッセージを抑制
+#+BEGIN_SRC emacs-lisp
+(setq inhibit-startup-message t)
+#+END_SRC
+
+** バックアップしない
+#+BEGIN_SRC emacs-lisp
+(setq make-backup-files nil)
+#+END_SRC
+
+** 自動保存したファイルを削除する。
+#+BEGIN_SRC emacs-lisp
+(setq delete-auto-save-files t)
+#+END_SRC
+
+** 圧縮されたファイルも編集＆日本語infoの文字化け防止
+#+BEGIN_SRC emacs-lisp
+(auto-compression-mode t)
+#+END_SRC
+
+** 自動セーブしない
+#+BEGIN_SRC emacs-lisp
+(setq auto-save-default nil)
+(setq auto-save-list-file-prefix nil)   ; don't make ~/.saves-PID-hostname
+#+END_SRC
+
+** kill-lineで行末の改行文字も削除
+#+BEGIN_SRC emacs-lisp
+(setq kill-whole-line t)
+#+END_SRC
+
+** emacsとXWindowのクリップボードを共有する
+#+BEGIN_SRC emacs-lisp
+(setq x-select-enable-clipboard t)
+#+END_SRC
+
+** GCを減らす
+#+BEGIN_SRC emacs-lisp
+(setq gc-cons-threshold (* 50 gc-cons-threshold))
+#+END_SRC
+
+** ログの記録量を増やす
+#+BEGIN_SRC emacs-lisp
+(setq message-log-max 10000)
+#+END_SRC
+
+** 履歴存数を増やす
+#+BEGIN_SRC emacs-lisp
+(setq history-length 1000)
+#+END_SRC
+
+** ダイアログボックスを使わない
+#+BEGIN_SRC emacs-lisp
+(setq use-dialog-box nil)
+(defalias 'message-box 'message)
+#+END_SRC
+
+** yesで答る部分もyで答えられるように
+#+BEGIN_SRC emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+** ファイルが更新されていたら自動的に再読み込み
+#+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode)
+#+END_SRC
+
+** session.el
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'session)
+  ;; (add-hook 'after-init-hook 'session-initialize)
+#+END_SRC
+
+** minibuf-isearch
+
+#+BEGIN_SRC emacs-lisp
+  ;;(require 'minibuf-isearch)
+#+END_SRC
+
+** gnuplot
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.plt$" . gnuplot-mode))
+#+END_SRC
+
+** stumpwm
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'stumpwm-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.stumpwmrc$" . stumpwm-mode))
+#+END_SRC
+
+** auto-instamm
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'auto-install)
+  ;; (setq auto-install-directroy "~/.emacs.d/elisp/")
+  ;; (auto-install-update-emacswiki-package-name t)
+#+END_SRC
+
+** 
+
+#+BEGIN_SRC emacs-lisp
+  
+  (defun rt/eieio-create-slots ()
+    (interactive)
+    (let ((l (split-string (read-from-minibuffer "") " ")))
+      (insert (format "%S"
+                      (mapcar (lambda (att)
+                                (list (intern att) :initarg (intern (concat ":" att))))
+                              l)))))
+  
+  
+  
+#+END_SRC
+
+** show-paren-mode
+
+#+BEGIN_SRC emacs-lisp
+  (show-paren-mode t)
+#+END_SRC
+* my-outputz
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/Dropbox/code/elisp/")
+  (require 'my-outputz)
+  (global-outputz-mode t)
+#+END_SRC
+
+* log
+
+
+#+BEGIN_SRC emacs-lisp
+  (defun fluend-send ()
+    (call-process "curl" nil t t "http://localhost:12000/debug.curl -D 'json={\"log\":\"hoge\"}'"))
+  
+  ;; (add-hook 'find-file-hook 'log-emacs-find)
+  
+  (defun log-emacs-find ()
+    (call-process "emacs_report" nil t t "emacs-find"
+                  (buffer-name)
+                  (int-to-string (buffer-size))
+                  (buffer-file-name)))
+    
+  ;;  (add-hook 'after-change-major-mode-hook 'log-emacs-mode)
+    (defun log-emacs-mode  ()
+      (call-process "emacs_report" nil t t "emacs-mode" (cond
+                                                         ((stringp mode-name)
+                                                          mode-name)
+                                                         ((listp mode-name)
+  p                                                        (car mode-name)))))
+                                                                 
+       
+       
+#+END_SRC
+* auto async
+#+BEGIN_SRC
+(require 'auto-async-byte-compile)
+(setq auto-async-byte-compile-exclude-files-regexp "/junk/")
+(add-hook 'emacs-lisp-mode-hook 'enable-auto-async-byte-compile-mode)
+#+END_SRC

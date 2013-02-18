@@ -1,0 +1,4 @@
+
+#+BEGIN_SRC emacs-lisp
+  (el-get 'sync '(clojure-mode nrepl))
+#+END_SRC

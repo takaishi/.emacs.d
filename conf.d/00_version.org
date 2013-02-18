@@ -1,0 +1,69 @@
+#+TITLE: 実行環境の判別・バージョンの判別
+#+AUTHOR: Ryo Takaishi
+#+LINK_HOME: http://repl.info/
+#+LINK_UP: http://repl.info/emacs/config/
+#+OPTIONS: toc:nil author:nil creator:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="/style/style.css">
+#+STYLE: <script type="text/javascript" src="./jquery-1.4.2.js"></script> <script type="text/javascript" src="./jquery.timer.js"></script><script type="text/javascript" src="./my.js"></script>
+* 実行環境判別
+
+どこかで見たコードのコピペ．どこで見たのだろう……
+
+** OS判別
+*** UNIX上で動いているかどうか
+#+BEGIN_SRC emacs-lisp
+  
+  (defvar run-unix
+   (or (equal system-type 'gnu/linux)
+        (or (equal system-type 'usg-unix-v)
+            (or (equal system-type 'berkeley-unix)
+                    (equal system-type 'cygwin)))))
+#+END_SRC
+
+*** MacOSX上で動いているかどうか
+#+BEGIN_SRC emacs-lisp
+(defvar run-mac
+  (equal system-type 'darwin))
+#+END_SRC
+
+*** Linux上で動いているかどうか
+#+BEGIN_SRC emacs-lisp
+(defvar run-linux
+  (equal system-type 'gnu/linux))
+
+#+END_SRC
+
+*** Windows上で動いているかどうか
+#+BEGIN_SRC emacs-lisp
+  (defvar run-w32
+    (and (null run-unix)
+         (or (equal system-type 'windows-nt)
+             (equal system-type 'ms-dos))))
+#+END_SRC
+
+** emacsenの種類とバージョンの判別
+#+BEGIN_SRC emacs-lisp
+  (defvar run-emacs20
+    (and (equal emacs-major-version 20)
+         (null (featurep 'xemacs))))
+  
+  (defvar run-emacs21
+    (and (equal emacs-major-version 21)
+         (null (featurep 'xemacs))))
+  
+  (defvar run-emacs22
+    (and (equal emacs-major-version 22)
+         (null (featurep 'xemacs))))
+  
+  (defvar run-emacs24
+    (and (equal emacs-major-version 24)
+         (null (featurep 'xemacs))))
+  
+  (defvar run-meadow (featurep 'meadow))
+  (defvar run-meadow1 (and run-meadow run-emacs20))
+  (defvar run-meadow2 (and run-meadow run-emacs21))
+  (defvar run-meadow3 (and run-meadow run-emacs22))
+  
+#+END_SRC
+
+

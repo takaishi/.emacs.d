@@ -1,0 +1,37 @@
+
+sgml-mode + mmm-mode。
+
+CDATAでecmaを指定している箇所ではjavascript-modeを使う。
+#+BEGIN_SRC emacs-lisp
+    ;;(add-to-list 'load-path "~/.emacs.d/el-get/mmm-mode")
+  (el-get 'sync 'mmm-mode)
+  (require 'mmm-mode)
+  (setq mmm-global-mode 'maybe)
+  (setq auto-mode-alist
+        (append '(("\\.xml$" . sgml-mode)) auto-mode-alist))
+  
+  (mmm-add-classes
+   '(
+     (mmm-sgml-javascript-mode
+      :submode javascript-mode
+      :face mmm-code-submode-face
+      :front "<!\\[CDATA\\[ecma:"2
+      :back "\\]\\]>"
+      )))
+  (setq javascript-indent-level 1)
+  (mmm-add-mode-ext-class 'sgml-mode nil 'mmm-sgml-javascript-mode)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'sgml-mode-hook
+            '(lambda()
+               (hs-minor-mode 1)))
+  
+  (add-to-list 'hs-special-modes-alist
+               '(sgml-mode
+                 "<!--\\|<[^/>]>\\|<[^/][^>]*[^/]>"
+                 ""
+                 "<!--"
+                 sgml-skip-tag-forward
+                 nil))
+#+END_SRC

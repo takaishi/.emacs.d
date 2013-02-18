@@ -1,0 +1,5 @@
+#+BEGIN_SRC emacs-lisp
+  (el-get 'sync 'auto-save-buffers)
+  (require 'auto-save-buffers)
+  (run-with-idle-timer 2 t 'auto-save-buffers)
+#+END_SRC

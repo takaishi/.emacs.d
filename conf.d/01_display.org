@@ -1,0 +1,177 @@
+* フォントセット
+** MacBookAir
+#+BEGIN_SRC emacs-lisp
+  (when (string= (system-name) "takaishi-no-MacBook-Air.local")
+    (create-fontset-from-ascii-font "-apple-inconsolata-medium-r-normal--14-0-72-72-m-0-iso10646-1" nil "mac")
+    (set-fontset-font "fontset-mac"
+                      'japanese-jisx0208
+                      '("ヒラギノ丸ゴ pro w4*" . "jisx0208.*"))
+    (set-fontset-font "fontset-mac"
+                      'katakana-jisx0201
+                      '("ヒラギノ丸ゴ pro w4*" . "jisx0201.*"))
+    (add-to-list 'default-frame-alist '(font . "fontset-mac")))
+  
+#+END_SRC
+
+** Inconsolata + MigMix
+#+BEGIN_SRC emacs-lisp
+  (when (string= (system-name) "ubuntu")
+      (create-fontset-from-ascii-font "-unknown-Inconsolata-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1" nil "myfont")
+    (set-fontset-font "fontset-myfont"
+                      'japanese-jisx0208
+                      '("MigMix 2M" . "iso10646-1"))
+    (set-fontset-font "fontset-myfont"
+                      'katakana-jisx0201
+                      '("MigMix 2M" . "iso10646-1"))
+    (set-fontset-font "fontset-myfont"
+                      'japanese-jisx0212
+                      '("MigMix 2M" . "iso10646-1"))
+    (set-fontset-font "fontset-myfont"
+                      'mule-unicode-0100-24ff
+                      '("MigMix 2M" . "iso10646-1")))
+#+END_SRC
+
+** M+ Bitmap font
+#+BEGIN_SRC emacs-lisp
+  (when (and run-linux (string= (system-name) "turris"))
+    (create-fontset-from-ascii-font "ascii:-mplus-gothic-medium-r-normal--10-*-iso8859-1" nil "mplus_10r")
+    (set-fontset-font "fontset-mplus_10r"
+                      'japanese-jisx0208
+                      "-mplus-gothic-medium-r-normal--10-*-jisx0208.1990-0")
+    (set-fontset-font "fontset-mplus_10r"
+                      'katakana-jisx0201
+                      "-mplus-gothic-medium-r-normal--10-*-jisx0201.1976-0")
+  
+    (create-fontset-from-ascii-font "ascii:-mplus-gothic-bold-r-normal--10-*-iso8859-1" nil "mplus_10b")
+    (set-fontset-font "fontset-mplus_10b"
+                      'japanese-jisx0208
+                      "-mplus-gothic-bold-r-normal--10-*-jisx0208.1990-0")
+  
+    (set-fontset-font "fontset-mplus_10b"
+                      'katakana-jisx0201
+                      "-mplus-gothic-bold-r-normal--10-*-jisx0201.1976-0")
+  
+    (create-fontset-from-ascii-font "ascii:-mplus-gothic-medium-r-normal--12-*-iso8859-1" nil "mplus_12r")
+  
+    (set-fontset-font "fontset-mplus_12r"
+                      'japanese-jisx0208
+                      "-mplus-gothic-medium-r-normal--12-*-jisx0208.1990-0")
+  
+    (set-fontset-font "fontset-mplus_12r"
+                      'katakana-jisx0201
+                      "-mplus-gothic-medium-r-normal--12-*-jisx0201.1976-0")
+  
+    (create-fontset-from-ascii-font "ascii:-mplus-gothic-bold-r-normal--12-*-iso8859-1" nil "mplus_12b")
+  
+    (set-fontset-font "fontset-mplus_12b"
+                      'japanese-jisx0208
+                      "-mplus-gothic-bold-r-normal--12-*-jisx0208.1990-0")
+    (set-fontset-font "fontset-mplus_12b"
+                      'katakana-jisx0201
+                      "-mplus-gothic-bold-r-normal--12-*-jisx0201.1976-0")
+  
+    )
+#+END_SRC
+* テーマ
+#+BEGIN_SRC emacs-lisp
+(load-theme 'wombat)
+#+END_SRC
+
+* 起動時のフレームを設定する
+
+#+BEGIN_SRC emacs-lisp
+  (when (string= (system-name) "takaishi-no-MacBook-Air.local")
+    (set-frame-font "fontset-mac"))
+  
+  (when (string= (system-name) "ubuntu")
+    (set-frame-font "fontset-myfont"))
+  
+  (when (and run-linux (string= (system-name) "turris"))
+    (progn
+      ;;(set-frame-parameter nil 'alpha 85)
+      (when (>= emacs-major-version 23)
+        ;;(set-default-font "fontset-myfont")
+        (set-default-font "fontset-mplus_12r")
+        ;;        (setq default-frame-alist (append '((font . "fontset-myfont"))
+        (setq default-frame-alist (append '((font . "fontset-mplus_12r"))
+                                          ;;                                             (width . 64)
+  ;;;                                             (height . 20))
+                                          default-frame-alist))
+        (setq ns-pop-up-frames nil))
+      (setq initial-frame-alist default-frame-alist)))
+  
+#+END_SRC
+  
+** メニューバーを非表示にする
+#+BEGIN_SRC emacs-lisp
+(menu-bar-mode 0)
+#+END_SRC
+** ツールバーを非表示にする 
+#+BEGIN_SRC emacs-lisp
+(tool-bar-mode 0)
+#+END_SRC
+** スクロールバーを非表示にする 
+#+BEGIN_SRC emacs-lisp
+(set-scroll-bar-mode nil) 
+#+END_SRC
+
+** 行間を0に 
+ #+BEGIN_SRC emacs-lisp
+(setq line-spacing 0)      
+#+END_SRC
+
+** 行数を表示
+#+BEGIN_SRC emacs-lisp
+(line-number-mode t)
+ #+END_SRC
+
+** 列数を表示
+#+BEGIN_SRC emacs-lisp
+(column-number-mode t)
+#+END_SRC
+** タブの幅．現在は半角スペース4個
+#+BEGIN_SRC emacs-lisp
+(setq-default tab-width 2) 
+(setq-default js-indent-level 2)
+(setq-default javascript-indent-level 1)
+(setq-default indent-tabs-mode nil)
+#+END_SRC
+** デフォルトのタブの幅．現在はtab-widthと同じ
+#+BEGIN_SRC emacs-lisp
+(setq default-tab-width tab-width)
+(setq indent-tabs-mode nil)
+#+END_SRC
+
+* 簡単に文字を拡大・縮小できるようにする
+#+BEGIN_SRC emacs-lisp
+  (defun djcb-zoom (n)
+    "with positive N, increase the font size, otherwise decrease it"
+    (set-face-attribute 'default (selected-frame) :height 
+                        (+ (face-attribute 'default :height) (* (if (> n 0) 1 -1) 10)))) 
+#+END_SRC
+
+** 拡大キーバインド設定
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-+")      '(lambda nil (interactive) (djcb-zoom 1)))
+  (global-set-key [C-kp-add]       '(lambda nil (interactive) (djcb-zoom 1)))
+#+END_SRC
+** 縮小キーバインド設定
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C--")      '(lambda nil (interactive) (djcb-zoom -1)))
+  (global-set-key [C-kp-subtract]  '(lambda nil (interactive) (djcb-zoom -1)))
+#+END_SRC
+
+* フルスクリーン
+
+#+BEGIN_SRC emacs-lisp
+  (when run-linux
+    (defun toggle-fullscreen ()
+      "Toggle full screen on X11"
+      (interactive)
+      (when (eq window-system 'x)
+        (set-frame-parameter
+         nil 'fullscreen
+         (when (not (frame-parameter nil 'fullscreen)) 'fullboth))))
+    (global-set-key [f9] 'toggle-fullscreen)
+    )
+#+END_SRC
