@@ -1,1 +1,12 @@
 conf.d/*.el
+conf.d/*.elc
+conf.org_
+el-get/recipes/emacswiki
+el-get
+site-lisp
+url
+org-clock-save.el
+bookmarks
+.org-id-locations
+ac-comphist.dat
+tramp
