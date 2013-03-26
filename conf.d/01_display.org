@@ -93,7 +93,7 @@
       ;;(set-frame-parameter nil 'alpha 85)
       (when (>= emacs-major-version 23)
         ;;(set-default-font "fontset-myfont")
-        (set-default-font "fontset-mplus_12r")
+        (set-frame-font "fontset-mplus_12r")
         ;;        (setq default-frame-alist (append '((font . "fontset-myfont"))
         (setq default-frame-alist (append '((font . "fontset-mplus_12r"))
                                           ;;                                             (width . 64)
@@ -140,8 +140,8 @@
 #+END_SRC
 ** デフォルトのタブの幅．現在はtab-widthと同じ
 #+BEGIN_SRC emacs-lisp
-(setq default-tab-width tab-width)
-(setq indent-tabs-mode nil)
+  (setq tab-width tab-width)
+  (setq indent-tabs-mode nil)
 #+END_SRC
 
 * 簡単に文字を拡大・縮小できるようにする
