@@ -1,16 +1,18 @@
 * フォントセット
 ** MacBookAir
 #+BEGIN_SRC emacs-lisp
-  (when (string= (system-name) "takaishi-no-MacBook-Air.local")
-    (create-fontset-from-ascii-font "-apple-inconsolata-medium-r-normal--14-0-72-72-m-0-iso10646-1" nil "mac")
-    (set-fontset-font "fontset-mac"
-                      'japanese-jisx0208
-                      '("ヒラギノ丸ゴ pro w4*" . "jisx0208.*"))
-    (set-fontset-font "fontset-mac"
-                      'katakana-jisx0201
-                      '("ヒラギノ丸ゴ pro w4*" . "jisx0201.*"))
-    (add-to-list 'default-frame-alist '(font . "fontset-mac")))
+  (defun rtak-system-in-mba ()
+    (string= (system-name) "takaishi-no-MacBook-Air.local"))
   
+  (when (rtak-system-in-mba)
+    (create-fontset-from-ascii-font "-apple-inconsolata-medium-r-normal--14-0-72-72-m-0-iso10646-1" nil "mac")
+    (set-fontset-font "fontset-mac" 'japanese-jisx0208
+                      '("Hiragino Maru Gothic Pro" . "iso10646-1"))
+    (set-fontset-font "fontset-mac" 'katakana-jisx0201
+                      '("Hiragino Maru Gothic Pro" . "iso10646-1"))
+    (set-fontset-font "fontset-mac" 'japanese-jisx0212
+                      '("Hiragino Maru Gothic Pro" . "iso10646-1"))
+    (add-to-list 'default-frame-alist '(font . "fontset-mac")))
 #+END_SRC
 
 ** Inconsolata + MigMix
