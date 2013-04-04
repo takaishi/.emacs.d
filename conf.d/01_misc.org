@@ -187,7 +187,7 @@
                                                          ((stringp mode-name)
                                                           mode-name)
                                                          ((listp mode-name)
-  p                                                        (car mode-name)))))
+                                                          (car mode-name)))))
                                                                  
        
        
@@ -197,4 +197,31 @@
 (require 'auto-async-byte-compile)
 (setq auto-async-byte-compile-exclude-files-regexp "/junk/")
 (add-hook 'emacs-lisp-mode-hook 'enable-auto-async-byte-compile-mode)
+#+END_SRC
+* highlight-change-mode
+
+#+BEGIN_SRC emacs-lisp
+  (custom-theme-set-faces 'user '(highlight-changes ((t nil))))
+  (custom-theme-set-faces 'user '(highlight-changes ((t nil))))
+  (custom-theme-set-faces 'user '(highlight-changes-delete ((t nil))))
+  (setq highlight-changes-visibility-initial-state nil)
+#+END_SRC
+
+* 
+
+#+BEGIN_SRC emacs-lisp
+  (if run-linux
+      (setq browse-url-browser-function 'browse-url-firefox))
+  
+#+END_SRC
+* groovy
+
+#+BEGIN_SRC emacs-lisp
+  (require 'groovy-mode)
+#+END_SRC
+
+* po
+
+#+BEGIN_SRC emacs-lisp
+  (require 'po-mode)
 #+END_SRC
