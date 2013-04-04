@@ -4,548 +4,553 @@
 #+LINK_UP: http://repl.info/emacs/config/
 #+OPTIONS: toc:nil author:nil creator:nil
 #+STARTUP: overview
+
 * 初期設定
-:PROPERTIES:
-:MTIME: 1323692477
-:MTIME-1: <2011-12-12 月 21:21:17>
-:END:
+ :PROPERTIES:
+ :MTIME: 1323692477
+ :MTIME-1: <2011-12-12 月 21:21:17>
+ :END:
 ** load-pathの設定
-:PROPERTIES:
-:Modified: 1323683081
-:Modified-1: <2011-12-12 月 18:44:41>
-:MTIME: 1324372118
-:MTIME-1: <2011-12-20 火 18:08:38>
-:END:
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/site-lisp/org-mode/lisp")
-  (add-to-list 'load-path "~/.emacs.d/site-lisp/org-mode/contrib/lisp")
-  
-  (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
-  (add-to-list 'load-path "~/code/elisp/org-book-manager")
-    
-    (add-hook 'org-mode-hook
-              '(lambda ()
-                 (setq indent-tabs-mode nil)))
-    
-    (require 'org-capture)
-    (require 'org-exp-bibtex)
-    (require 'org-latex)
-    (require 'org-colview)
-    (require 'org-habit)
-    (require 'org-id)
-#+END_SRC
+ :PROPERTIES:
+ :Modified: 1323683081
+ :Modified-1: <2011-12-12 月 18:44:41>
+ :MTIME: 1324372118
+ :MTIME-1: <2011-12-20 火 18:08:38>
+ :END:
+ #+BEGIN_SRC emacs-lisp
+   (add-to-list 'load-path "~/.emacs.d/site-lisp/org-mode/lisp")
+   (add-to-list 'load-path "~/.emacs.d/site-lisp/org-mode/contrib/lisp")
+
+   (add-to-list 'auto-mode-alist '("\\.\\(org\\|org_archive\\|txt\\)$" . org-mode))
+   (add-to-list 'load-path "~/code/elisp/org-book-manager")
+
+     (add-hook 'org-mode-hook
+               '(lambda ()
+                  (setq indent-tabs-mode nil)))
+
+     (require 'org-capture)
+   ;;  (require 'org-exp-bibtex)
+     (require 'org-latex)
+     (require 'org-colview)
+     (require 'org-habit)
+     (require 'org-id)
+ #+END_SRC
 * キーバインド
-:PROPERTIES:
-:MTIME: 1324283605
-:MTIME-1: <2011-12-19 月 17:33:25>
-:END:
+ :PROPERTIES:
+ :MTIME: 1324283605
+ :MTIME-1: <2011-12-19 月 17:33:25>
+ :END:
 
-#+CAPTION: key binding
-#+ATTR_HTML:
-| key   | function       |
-|-------+----------------|
-| C-c l | org-store-link |
-| C-c a | org-agenda     |
-| C-c b | org-isqitchb   |
+ #+CAPTION: key binding
+ #+ATTR_HTML:
+ | key   | function       |
+ |-------+----------------|
+ | C-c l | org-store-link |
+ | C-c a | org-agenda     |
+ | C-c b | org-isqitchb   |
 
 
-#+BEGIN_SRC emacs-lisp
-(define-key global-map "\C-cl" 'org-store-link)
-(define-key global-map "\C-ca" 'org-agenda)
-(define-key global-map "\C-cb" 'org-iswitchb)
+ #+BEGIN_SRC emacs-lisp
+ (define-key global-map "\C-cl" 'org-store-link)
+ (define-key global-map "\C-ca" 'org-agenda)
+ (define-key global-map "\C-cb" 'org-iswitchb)
 
-(add-hook 'org-mode-hook
-	  '(lambda ()
-	     (setq fill-column 65)
-	     (auto-fill-mode 1)))
-#+END_SRC
+ (add-hook 'org-mode-hook
+     '(lambda ()
+        (setq fill-column 65)
+        (auto-fill-mode 1)))
+ #+END_SRC
 * アジェンダファイル
 
-現在、org-modeが管理しているファイルは3つ．
+ 現在、org-modeが管理しているファイルは3つ．
 
-- refile.org: INBOXファイル．org-captureでC-c C-cを実行した場合はここにリファイルされる．
-- todo.org: タスク管理用ファイル．
-- notes.org: メモ・ノート用ファイル．
-- info.org: 使ってるサービスやその支払い情報等を管理。Dropboxで同期はしていない。
-- work.org: 会社のタスクを管理
-- trac.org: チケットのインポート用
+ - refile.org: INBOXファイル．org-captureでC-c C-cを実行した場合はここにリファイルされる．
+ - todo.org: タスク管理用ファイル．
+ - notes.org: メモ・ノート用ファイル．
+ - info.org: 使ってるサービスやその支払い情報等を管理。Dropboxで同期はしていない。
+ - work.org: 会社のタスクを管理
+ - trac.org: チケットのインポート用
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-agenda-files-dir "~/doc/")
-  
-  (cond
-   (run-w32
-    (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org" "work.org")))
-   ((or run-mac (string= (system-name) "ubuntu"))
-    (setq org-agenda-files-dir "~/Documents/")
-    (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org")))
-   (run-linux
-    (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org"))))
-   
-  (setq org-agenda-files (mapcar (lambda (f) (concat org-agenda-files-dir f))
-                                 org-agenda-files-suffix))
-  
-  (defmacro work-in-turris (&rest body)
-    `(if (string= "turris" (system-name))
-         (cond ,body)
-       ))
-  
-  (defmacro work-in-macbook (&rest body)
-    `(if (string= "takaishi-no-MacBook-Air.local" (system-name))
-         (cond ,body)
-       ))
-  
-  (work-in-turris
-   (setq org-agenda-files (cons "~/work/work.org" org-agenda-files))
-   (setq org-agenda-files (cons "~/work/trac.org" org-agenda-files)))
-                                   
-  (work-in-macbook
-   (setq org-agenda-files (cons "~/Documents/info.org" org-agenda-files)))
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-agenda-files-dir "~/doc/")
+
+   (cond
+    (run-w32
+     (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org" "work.org")))
+    ((or run-mac (string= (system-name) "ubuntu"))
+     (setq org-agenda-files-dir "~/Documents/")
+     (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org")))
+    (run-linux
+     (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org"))))
+
+   (setq org-agenda-files (mapcar (lambda (f) (concat org-agenda-files-dir f))
+                                  org-agenda-files-suffix))
+
+   (defmacro work-in-turris (&rest body)
+     `(if (string= "turris" (system-name))
+          (cond ,body)
+        ))
+
+   (defmacro work-in-macbook (&rest body)
+     `(if (string= "takaishi-no-MacBook-Air.local" (system-name))
+          (cond ,body)
+        ))
+
+   (work-in-turris
+    (setq org-agenda-files (cons "~/work/work.org" org-agenda-files))
+    (setq org-agenda-files (cons "~/work/trac.org" org-agenda-files)))
+
+   (work-in-macbook
+    (setq org-agenda-files (cons "~/Documents/info.org" org-agenda-files)))
+ #+END_SRC
 * アジェンダビュー
 
-#+BEGIN_SRC emacs-lisp
-  ;; ウィークリー/デイリーアジェンダ(C-c a a)の初期表示をデイリーにする
-  (setq org-agenda-span 'day)
-  
-  ;; 時間表示が1桁の時、0をつける
-  (setq org-agenda-time-leading-zero t)
-  
-  ;; log-modeで表示するアイテム
-  (setq org-agenda-log-mode-items (quote (closed state)))
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   ;; ウィークリー/デイリーアジェンダ(C-c a a)の初期表示をデイリーにする
+   (setq org-agenda-span 'day)
+
+   ;; 時間表示が1桁の時、0をつける
+   (setq org-agenda-time-leading-zero t)
+
+   ;; log-modeで表示するアイテム
+   (setq org-agenda-log-mode-items (quote (closed state)))
+ #+END_SRC
 ** アジェンダコマンドをカスタマイズする
-#+BEGIN_SRC emacs-lisp
-  (setq org-agenda-custom-commands
-        `(("N" "Notes" tags "NOTE"
-           ((org-agenda-overriding-header "Notes")
-            (org-tags-match-list-sublevels t)))
-          
-          ("r" "Tasks to Refile" tags "REFILE"
-           ((org-agenda-overriding-header "Notes and Tasks to Refile")
-            (org-agenda-overriding-header "Tasks to Refile")))
-          
-          ("h" "Habits" tags-todo "STYLE=\"habit\""
-           ((org-agenda-overriding-header "Habits")
-            (org-agenda-sorting-strategy
-             '(todo-state-down effort-up category-keep))))
-  
-          ("p" "Projects" tags-todo "-HOLD-CANCELLED/!"
-           ((org-agenda-overriding-header "Projects")
-            
-            (org-agenda-sorting-strategy
-             '(category-keep))))
-          
-          ("w" "Work" tags-todo "WORK")
-          
-          (" " "Agenda"
-           ((agenda " " nil)
-            (tags "REFILE"
-                  ((org-agenda-overriding-header "Tasks to Refile")
-                   (org-tags-match-list-sublevels nil)))
-            (tags-todo "-CALCELED/!NEXT"
-                       ((org-agenda-overriding-header "Tasks to Next")))
-            ,(work-in-turris
-              '(tags-todo "WORK"
-                         ((org-agenda-overriding-header "Task of ")
-                          (org-tags-match-list-sublevels nil))))
-            ,(work-in-turris
-              '(tags-todo "TRAC"
-                         ((org-agenda-overriding-header "Tickets")
-                          (org-tags-match-list-sublevels nil))))))
-          ))
-  
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-agenda-custom-commands
+         `(("N" "Notes" tags "NOTE"
+            ((org-agenda-overriding-header "Notes")
+             (org-tags-match-list-sublevels t)))
+
+           ("r" "Tasks to Refile" tags "REFILE"
+            ((org-agenda-overriding-header "Notes and Tasks to Refile")
+             (org-agenda-overriding-header "Tasks to Refile")))
+
+           ("h" "Habits" tags-todo "STYLE=\"habit\""
+            ((org-agenda-overriding-header "Habits")
+             (org-agenda-sorting-strategy
+              '(todo-state-down effort-up category-keep))))
+
+           ("p" "Projects" tags-todo "-HOLD-CANCELLED/!"
+            ((org-agenda-overriding-header "Projects")
+
+             (org-agenda-sorting-strategy
+              '(category-keep))))
+
+           ("w" "Work" tags-todo "WORK")
+
+           (" " "Agenda"
+            ((agenda " " nil)
+             (tags "REFILE"
+                   ((org-agenda-overriding-header "Tasks to Refile")
+                    (org-tags-match-list-sublevels nil)))
+             (tags-todo "-CALCELED/!NEXT"
+                        ((org-agenda-overriding-header "Tasks to Next")))
+             ,(work-in-turris
+               '(tags-todo "WORK"
+                          ((org-agenda-overriding-header "Task of ")
+                           (org-tags-match-list-sublevels nil))))
+             ,(work-in-turris
+               '(tags-todo "TRAC"
+                          ((org-agenda-overriding-header "Tickets")
+                           (org-tags-match-list-sublevels nil))))))
+           ))
+
+ #+END_SRC
 
 * TODO
 ** todo state
-:PROPERTIES:
-:MTIME: 1325088978
-:MTIME-1: <2011-12-29 木 01:16:18>
-:END:
+ :PROPERTIES:
+ :MTIME: 1325088978
+ :MTIME-1: <2011-12-29 木 01:16:18>
+ :END:
 
-タスクの状態は全部で4．
+ タスクの状態は全部で4．
 
-- TODO: 未開始のタスク
-- NEXT: 開始したタスク
-- DONE: 終了したタスク
-- CANCELED: キャンセルしたタスク
-- WAITING: 連絡待ち，作業待ちなどで待機しているタスク 
+ - TODO: 未開始のタスク
+ - NEXT: 開始したタスク
+ - DONE: 終了したタスク
+ - CANCELED: キャンセルしたタスク
+ - WAITING: 連絡待ち，作業待ちなどで待機しているタスク 
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-todo-keywords
-        (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!/!)")
-                (sequence "WAITING(w@/!)" "CANCELLED(c@/!)"))))
-  
-  (setq org-todo-keyword-faces 
-        (quote (("TODO" :foreground "red" :weight bold)
-                ("NEXT" :foreground "cyan" :weight bold)
-                ("DONE" :foreground "green" :weight bold)
-                ("CANCELLED" :foreground "forest green" :weight bold))))
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-todo-keywords
+         (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!/!)")
+                 (sequence "WAITING(w@/!)" "CANCELLED(c@/!)"))))
 
-#+BEGIN_SRC plantuml :file transition-todo-state.png
+   (setq org-todo-keyword-faces 
+         (quote (("TODO" :foreground "red" :weight bold)
+                 ("NEXT" :foreground "cyan" :weight bold)
+                 ("DONE" :foreground "green" :weight bold)
+                 ("CANCELLED" :foreground "forest green" :weight bold))))
+ #+END_SRC
 
-[*] --> TODO
-TODO : t
-TODO -right-> DONE
-TODO -right-> NEXT
-TODO -down-> CANCELED
-TODO -down-> WAITING
+ #+BEGIN_SRC plantuml :file transition-todo-state.png
 
-STARTED : s
+ [*] --> TODO
+ TODO : t
+ TODO -right-> DONE
+ TODO -right-> NEXT
+ TODO -down-> CANCELED
+ TODO -down-> WAITING
 
-STARTED --> DONE
-STARTED --> CANCELED
-STARTED --> WAITING
+ STARTED : s
 
-CANCELED : c
+ STARTED --> DONE
+ STARTED --> CANCELED
+ STARTED --> WAITING
 
-WAITING : w
-WAITING --> NEXT
-WAITING --> DONE
+ CANCELED : c
 
-DONE : d
-DONE --> [*]
-#+END_SRC
+ WAITING : w
+ WAITING --> NEXT
+ WAITING --> DONE
 
-#+results:
-[[file:transition-todo-state.png]]
-#+CAPTION: Transition TODO state
-#+ATTR_HTML: alt="transition-todo-state image" title="Action!" align="right"
+ DONE : d
+ DONE --> [*]
+ #+END_SRC
+
+ #+results:
+ [[file:transition-todo-state.png]]
+ #+CAPTION: Transition TODO state
+ #+ATTR_HTML: alt="transition-todo-state image" title="Action!" align="right"
 
 ** auto-set tag with todo state
-:PROPERTIES:
-:Modified: 1323682342
-:Modified-1: <2011-12-12 月 18:32:22>
-:MTIME: 1325088905
-:MTIME-1: <2011-12-29 木 01:15:05>
-:END:
+ :PROPERTIES:
+ :Modified: 1323682342
+ :Modified-1: <2011-12-12 月 18:32:22>
+ :MTIME: 1325088905
+ :MTIME-1: <2011-12-29 木 01:15:05>
+ :END:
 
-タスクの状態によって自動的にタグをセットする．
+ タスクの状態によって自動的にタグをセットする．
 
-- 状態がCANCELLED: CANCELLEDタグをセット
-- それ以外: CANCELLEDタグを外す
+ - 状態がCANCELLED: CANCELLEDタグをセット
+ - それ以外: CANCELLEDタグを外す
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-todo-state-tags-triggers
-        (quote (("CANCELLED" ("CANCELLED" . t))
-                ("WAITING" ("WAITING" . t))
-                ("TODO" ("CANCELLED") ("WAITING"))
-                ("NEXT" ("CANCELLED") ("WITING"))
-                ("DONE" ("CANCELLED") ("WAIING")))))
-  
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-todo-state-tags-triggers
+         (quote (("CANCELLED" ("CANCELLED" . t))
+                 ("WAITING" ("WAITING" . t))
+                 ("TODO" ("CANCELLED") ("WAITING"))
+                 ("NEXT" ("CANCELLED") ("WITING"))
+                 ("DONE" ("CANCELLED") ("WAIING")))))
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-return-follows-link t)
-  (setq org-archive-mark-done nil)
-#+END_SRC
+ #+END_SRC
+
+ #+BEGIN_SRC emacs-lisp
+   (setq org-return-follows-link t)
+   (setq org-archive-mark-done nil)
+ #+END_SRC
 ** habit
-:PROPERTIES:
-:MTIME: 1324260809
-:MTIME-1: <2011-12-19 月 11:13:29>
-:END:
+ :PROPERTIES:
+ :MTIME: 1324260809
+ :MTIME-1: <2011-12-19 月 11:13:29>
+ :END:
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'org-modules 'org-habit)
+   (add-to-list 'org-modules 'org-habit)
 #+END_SRC
 ** タスクが完了した時、その時刻をLOGBOOKドロワーに記録する
 
 #+BEGIN_SRC emacs-lisp
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer "LOGBOOK")
+   (setq org-log-done 'time)
+   (setq org-log-into-drawer "LOGBOOK")
 #+END_SRC
 
 ** TODOタスクに依存性を持たせる
-:PROPERTIES:
-:MTIME: 1324266386
-:MTIME-1: <2011-12-19 月 12:46:26>
-:END:
+ :PROPERTIES:
+ :MTIME: 1324266386
+ :MTIME-1: <2011-12-19 月 12:46:26>
+ :END:
 
-org-enforce-todo-dependenciesがtだと，タスクに依存関係が生まれ，
-依存タスクを全て完了しないとタスクの完了ができなくなる．ORDEREDプ
-ロパティがない場合は，親タスクが子タスクの完了に依存する．ORDERED
-プロパティがtの場合は，子タスク間にも依存関係が生じ，上にあるタス
-クに依存する．ORDEREDプロパティをセットするには，"C-c C-x o"を使
-う．
+ org-enforce-todo-dependenciesがtだと，タスクに依存関係が生まれ，
+ 依存タスクを全て完了しないとタスクの完了ができなくなる．ORDEREDプ
+ ロパティがない場合は，親タスクが子タスクの完了に依存する．ORDERED
+ プロパティがtの場合は，子タスク間にも依存関係が生じ，上にあるタス
+ クに依存する．ORDEREDプロパティをセットするには，"C-c C-x o"を使
+ う．
 
-#+BEGIN_SRC org
-  ,* TODO 親タスク(子タスクを全て完了しないと完了できない)
-  ,** TODO 子タスクA
-  ,** TODO 子タスクB
-  
-  ,* TODO 親タスク(子タスクを全て完了しないと完了できない)
-  ,  :PROPERTIES:
-  ,  :ORDERED:  t
-  ,  :END:
-  ,** TODO A
-  ,** TODO B(タスクAが完了しないと完了できない)
-  ,** TODO C(タスクAとタスクBが完了しないと完了できない)
-#+END_SRC
+ #+BEGIN_SRC org
+   ,* TODO 親タスク(子タスクを全て完了しないと完了できない)
+   ,** TODO 子タスクA
+   ,** TODO 子タスクB
+   
+   ,* TODO 親タスク(子タスクを全て完了しないと完了できない)
+   ,  :PROPERTIES:
+   ,  :ORDERED:  t
+   ,  :END:
+   ,** TODO A
+   ,** TODO B(タスクAが完了しないと完了できない)
+   ,** TODO C(タスクAとタスクBが完了しないと完了できない)
+ #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-enforce-todo-dependencies t)
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-enforce-todo-dependencies t)
+ #+END_SRC
 * 時間計測
 ** 雑多な設定
 
-#+BEGIN_SRC emacs-lisp
-  ;; Emacsが再起動した時に測定中タスクの測定を再開する
-  (org-clock-persistence-insinuate)
-  
-  ;: 時間測定の履歴数
-  (setq org-clock-history-length 36)
-  
-  ;; ドロワーを分割する
-  (setq org-drawer (quote ("PROPERTIES" "LOGBOK")))
-  
-  ;; Emacsが再起動したときにタスクの時間計測を再開する
-  (setq org-clock-persist 'history)
-  
-  ;; タスクが完了した時に時間測定も停止する
-  (setq org-clock-out-when-done t)
-  
-  ;; Emacsが終了する時に測定中の計測と全ての測定履歴を保存する
-  (setq org-clock-persist t)
-  
-  ;; セレクションメニューから状態の変更を行えるようにする
-  (setq org-use-fast-todo-selection t)
+ #+BEGIN_SRC emacs-lisp
+   ;; Emacsが再起動した時に測定中タスクの測定を再開する
+   (org-clock-persistence-insinuate)
 
-  (setq org-clock-in-resume t)
+   ;: 時間測定の履歴数
+   (setq org-clock-history-length 36)
 
-  (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
+   ;; ドロワーを分割する
+   (setq org-drawer (quote ("PROPERTIES" "LOGBOK")))
 
-  ;; 測定した時間が0の場合消去する
-  (setq org-clock-out-remove-zero-time-clocks t)
+   ;; Emacsが再起動したときにタスクの時間計測を再開する
+   (setq org-clock-persist 'history)
 
-  ;;アジェンダのclockreport用パラメータ
-  (setq org-agenda-clockreport-parameter-plist
-        '(:maxlevel 5 :block t :tstart t :tend t :emphasize t :link t :narrow 80 :indent t :formula nil :timestamp t :level 5 :tcolumns nil :formatter nil))
+   ;; タスクが完了した時に時間測定も停止する
+   (setq org-clock-out-when-done t)
 
-  ;; カラムビューで表示する項目
-  (setq org-columns-default-format "%80ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM")
-#+END_SRC
+   ;; Emacsが終了する時に測定中の計測と全ての測定履歴を保存する
+   (setq org-clock-persist t)
+
+   ;; セレクションメニューから状態の変更を行えるようにする
+   (setq org-use-fast-todo-selection t)
+
+   (setq org-clock-in-resume t)
+
+   (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
+
+   ;; 測定した時間が0の場合消去する
+   (setq org-clock-out-remove-zero-time-clocks t)
+
+   ;;アジェンダのclockreport用パラメータ
+   (setq org-agenda-clockreport-parameter-plist
+         '(:maxlevel 5 :block t :tstart t :tend t :emphasize t :link t :narrow 80 :indent t :formula nil :timestamp t :level 5 :tcolumns nil :formatter nil))
+
+   ;; カラムビューで表示する項目
+   (setq org-columns-default-format "%80ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM")
+ #+END_SRC
 ** タスクの時間計測を開始した時に，自動的にタスクの状態をSTARTEDに変更する
-:PROPERTIES:
-:Modified: 1323682891
-:Modified-1: <2011-12-12 月 18:41:31>
-:MTIME: 1324266402
-:MTIME-1: <2011-12-19 月 12:46:42>
-:END:
+ :PROPERTIES:
+ :Modified: 1323682891
+ :Modified-1: <2011-12-12 月 18:41:31>
+ :MTIME: 1324266402
+ :MTIME-1: <2011-12-19 月 12:46:42>
+ :END:
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-clock-in-switch-to-state 'org-clock-in-to-started)
-  
-  (defun org-clock-in-to-started (state)
-    (if (string= state "TODO") "NEXT"))
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-clock-in-switch-to-state 'org-clock-in-to-started)
 
-#+RESULTS:
-: org-clock-in-to-started
+   (defun org-clock-in-to-started (state)
+     (if (or (string= state "TODO")
+             (string= state "WAITING"))
+         "NEXT"))
+ #+END_SRC
+
+ #+RESULTS:
+ : org-clock-in-to-started
 
 ** 時間の測定を始める
 
-C-c C-x C-iもしくはI(Agenda内のみ)
+ C-c C-x C-iもしくはI(Agenda内のみ)
 
 ** 仕事の開始時刻と終了時刻を記録する
 
-#+BEGIN_SRC emacs-lisp
-  
-  (setq bh/keep-clock-running nil)
-  
-  (defun bh/clock-in-to-next (kw)
-    "Switch a task from TODO to NEXT when clocking in.
-  Skips capture tasks, projects, and subprojects.
-  Switch projects and subprojects from NEXT back to TODO"
-    (when (not (and (boundp 'org-capture-mode) org-capture-mode))
-      (cond
-       ((and (member (org-get-todo-state) (list "TODO"))
-             (bh/is-task-p))
-        "NEXT")
-       ((and (member (org-get-todo-state) (list "NEXT"))
-             (bh/is-project-p))
-        "TODO"))))
-  
-  (defun bh/find-project-task ()
-    "Move point to the parent (project) task if any"
-    (save-restriction
-      (widen)
-      (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
-        (while (org-up-heading-safe)
-          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-            (setq parent-task (point))))
-        (goto-char parent-task)
-        parent-task)))
-  
-  (defun bh/punch-in (arg)
-    "Start continuous clocking and set the default task to the
-  selected task.  If no task is selected set the Organization task
-  as the default task."
-    (interactive "p")
-    (setq bh/keep-clock-running t)
-    (ad-deactivate-regexp "is-set-effort-before-clock-in")
-    (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
-    (if (equal major-mode 'org-agenda-mode)
-        ;;
-        ;; We're in the agenda
-        ;;
-        (let* ((marker (org-get-at-bol 'org-hd-marker))
-               (tags (org-with-point-at marker (org-get-tags-at))))
-          (if (and (eq arg 4) tags)
-              (org-agenda-clock-in '(16))
-            (bh/clock-in-organization-task-as-default)))
-      ;;
-      ;; We are not in the agenda
-      ;;
-      (save-restriction
-        (widen)
-        ; Find the tags on the current task
-        (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
-            (org-clock-in '(16))
-          (bh/clock-in-organization-task-as-default))))
-    (ad-activate-regexp "is-set-effort-before-clock-in")
-    (add-hook 'org-clock-in-hook 'org-pomodoro-start))
-  
-  (defun bh/punch-out ()
-    (interactive)
-    (setq bh/keep-clock-running nil)
-    (when (org-clock-is-active)
-      (org-clock-out))
-    (org-agenda-remove-restriction-lock))
-  
-  (defun bh/clock-in-default-task ()
-    (save-excursion
-      (org-with-point-at org-clock-default-task
-        (ad-deactivate-regexp "is-set-effort-before-clock-in")
-        (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
-        (org-clock-in)
-        (ad-activate-regexp "is-set-effort-before-clock-in")
-        (add-hook 'org-clock-in-hook 'org-pomodoro-start))))
-  
-  (defun bh/clock-in-parent-task ()
-    "Move point to the parent (project) task if any and clock in"
-    (let ((parent-task))
-      (save-excursion
-        (save-restriction
-          (widen)
-          (while (and (not parent-task) (org-up-heading-safe))
-            (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
-              (setq parent-task (point))))
-          (if parent-task
-              (org-with-point-at parent-task
-                (org-clock-in))
-            (when bh/keep-clock-running
-              (bh/clock-in-default-task)))))))
-  
-  (work-in-turris
-   (defvar bh/organization-task-id "6682f0b0-d6a6-43f2-82de-323a2e53fe93"))
-  
-  (defun bh/clock-in-organization-task-as-default ()
-    (interactive)
-    (org-with-point-at (org-id-find bh/organization-task-id 'marker)
-      (ad-deactivate-regexp "is-set-effort-before-clock-in")
-      (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
-      (org-clock-in '(16))
-      (ad-activate-regexp "is-set-effort-before-clock-in")
-      (add-hook 'org-clock-in-hook 'org-pomodoro-start)))
-  
-  (defun bh/clock-out-maybe ()
-    (when (and bh/keep-clock-running
-               (not org-clock-clocking-in)
-               (marker-buffer org-clock-default-task)
-               (not org-clock-resolving-clocks-due-to-idleness))
-      (bh/clock-in-parent-task)))
-  
-  (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
-  
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+
+   (setq bh/keep-clock-running nil)
+
+   (defun bh/clock-in-to-next (kw)
+     "Switch a task from TODO to NEXT when clocking in.
+   Skips capture tasks, projects, and subprojects.
+   Switch projects and subprojects from NEXT back to TODO"
+     (when (not (and (boundp 'org-capture-mode) org-capture-mode))
+       (cond
+        ((and (member (org-get-todo-state) (list "TODO"))
+              (bh/is-task-p))
+         "NEXT")
+        ((and (member (org-get-todo-state) (list "NEXT"))
+              (bh/is-project-p))
+         "TODO"))))
+
+   (defun bh/find-project-task ()
+     "Move point to the parent (project) task if any"
+     (save-restriction
+       (widen)
+       (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+         (while (org-up-heading-safe)
+           (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+             (setq parent-task (point))))
+         (goto-char parent-task)
+         parent-task)))
+
+   (defun bh/punch-in (arg)
+     "Start continuous clocking and set the default task to the
+   selected task.  If no task is selected set the Organization task
+   as the default task."
+     (interactive "p")
+     (setq bh/keep-clock-running t)
+     (ad-deactivate-regexp "is-set-effort-before-clock-in")
+     (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
+     (if (equal major-mode 'org-agenda-mode)
+         ;;
+         ;; We're in the agenda
+         ;;
+         (let* ((marker (org-get-at-bol 'org-hd-marker))
+                (tags (org-with-point-at marker (org-get-tags-at))))
+           (if (and (eq arg 4) tags)
+               (org-agenda-clock-in '(16))
+             (bh/clock-in-organization-task-as-default)))
+       ;;
+       ;; We are not in the agenda
+       ;;
+       (save-restriction
+         (widen)
+         ; Find the tags on the current task
+         (if (and (equal major-mode 'org-mode) (not (org-before-first-heading-p)) (eq arg 4))
+             (org-clock-in '(16))
+           (bh/clock-in-organization-task-as-default))))
+     (ad-activate-regexp "is-set-effort-before-clock-in")
+     (add-hook 'org-clock-in-hook 'org-pomodoro-start))
+
+   (defun bh/punch-out ()
+     (interactive)
+     (setq bh/keep-clock-running nil)
+     (when (org-clock-is-active)
+       (org-clock-out))
+     (org-agenda-remove-restriction-lock))
+
+   (defun bh/clock-in-default-task ()
+     (save-excursion
+       (org-with-point-at org-clock-default-task
+         (ad-deactivate-regexp "is-set-effort-before-clock-in")
+         (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
+         (org-clock-in)
+         (ad-activate-regexp "is-set-effort-before-clock-in")
+         (add-hook 'org-clock-in-hook 'org-pomodoro-start))))
+
+   (defun bh/clock-in-parent-task ()
+     "Move point to the parent (project) task if any and clock in"
+     (let ((parent-task))
+       (save-excursion
+         (save-restriction
+           (widen)
+           (while (and (not parent-task) (org-up-heading-safe))
+             (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+               (setq parent-task (point))))
+           (if parent-task
+               (org-with-point-at parent-task
+                 (org-clock-in))
+             (when bh/keep-clock-running
+               (bh/clock-in-default-task)))))))
+
+   (work-in-turris
+    (defvar bh/organization-task-id "6682f0b0-d6a6-43f2-82de-323a2e53fe93"))
+
+   (defun bh/clock-in-organization-task-as-default ()
+     (interactive)
+     (org-with-point-at (org-id-find bh/organization-task-id 'marker)
+       (ad-deactivate-regexp "is-set-effort-before-clock-in")
+       (remove-hook 'org-clock-in-hook 'org-pomodoro-start)
+       (org-clock-in '(16))
+       (ad-activate-regexp "is-set-effort-before-clock-in")
+       (add-hook 'org-clock-in-hook 'org-pomodoro-start)))
+
+   (defun bh/clock-out-maybe ()
+     (when (and bh/keep-clock-running
+                (not org-clock-clocking-in)
+                (marker-buffer org-clock-default-task)
+                (not org-clock-resolving-clocks-due-to-idleness))
+       (bh/clock-in-parent-task)))
+
+   (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
+
+ #+END_SRC
 
 ** 時間計測を開始する前に必ず見積りを行う
 
 
-#+BEGIN_SRC emacs-lisp
-  (defadvice org-clock-in (before is-set-effort-before-clock-in)
-    (let ((effort (org-entry-get (point) "Effort")))
-      (unless effort
-        (error "[Error: Is not set a effort!]"))))
-  
-  (ad-activate-regexp "is-set-effort-before-clock-in")
-  
-  
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   ;; (defadvice org-clock-in (before is-set-effort-before-clock-in)
+   ;;   (let ((effort (org-entry-get (point) "Effort")))
+   ;;     (unless effort
+   ;;       (error "[Error: Is not set a effort!]"))))
+
+   ;; (ad-activate-regexp "is-set-effort-before-clock-in")
+
+ #+END_SRC
 
 * org-capture
-:PROPERTIES:
-:Modified: 1323683465
-:Modified-1: <2011-12-12 月 18:51:05>
-:END:
+ :PROPERTIES:
+ :Modified: 1323683465
+ :Modified-1: <2011-12-12 月 18:51:05>
+ :END:
 
-#+BEGIN_SRC emacs-lisp
-  (define-key global-map "\C-cc" 'org-capture)
-  
-  (setq org-completion-use-helm nil)
-  
-  (setq org-refile-path
-        (if (or run-mac (string= (system-name) "ubuntu"))
-            "~/Documents/refile.org"
-            "~/doc/refile.org"))
-  
-  (defun get-category-from-description (desc)
-    (if (string-match "#\\([0-9]+\\) .*" desc)
-         (match-string 1 desc)))
-  
-  (setq org-capture-templates
-        `(("t" "todo" entry (file org-refile-path "")
-           "* TODO %?\n%U\n%a\n  %i" :clock-in t :clock-resume t)
-          ("p" "Phone call" entry (file "~/doc/refile.org")
-           "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
-          ("n" "note" entry (file org-refile-path  "")
-           "* %? :NOTE:\n  %u" :clock-in t :clock-resume t)
-          ("j" "journal" entry (file+datetree "~/doc/diary.org")
-           "* %?\n%U\n  %i" :clock-in t :clock-resume t)
-          ("h" "Habit" entry (file "~/doc/refile.org")
-           "* NEXT %?\n%a\nSCHEDULED: %t .+d/3d\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
-          ;;("b" "Bookmark" entry (file+headline "~/trac.org" "Bugs of Trac")
-          ("b" "Bookmark" entry (file+headline "~/work/trac.org" (plist-get (plist-get org-store-link-plist :query) :milestone))
-           "* TODO %:description
-  :PROPERTIES:
-  :CATEGORY: %(get-category-from-description %:description)
-  :ID: %(plist-get (plist-get org-store-link-plist :query) :ticket-id)
-  :CUSTOMER: %(plist-get (plist-get org-store-link-plist :query) :customer)
-  :URL: %:link
-  :END:
-  
-  " :immediate-finish t)
-  
-          ("d" "daily report" entry (file+datetree "~/work/daily-report.org")
-           "* %?")
-  
-          ("w" "weekly report" entry (file+datetree "~/work/weekly-report.org")
-           "* %?")
-  
-          ))
-  
-  (defun in-turris ()
-    (string= "turris" (system-name)))
-        
-  (setq org-capture-templates-contexts
-        '(("d" (in-turris))
-          ("w" (in-turris))))
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (define-key global-map "\C-cc" 'org-capture)
+   
+   (setq org-completion-use-helm nil)
+   
+   (setq org-refile-path
+         (if (or run-mac (string= (system-name) "ubuntu"))
+             "~/Documents/refile.org"
+             "~/doc/refile.org"))
+   
+   (defun get-category-from-description (desc)
+     (if (string-match "#\\([0-9]+\\) .*" desc)
+          (match-string 1 desc)))
+   
+   (setq org-capture-templates
+         `(("t" "todo" entry (file org-refile-path "")
+            "* TODO %?\n%U\n%a\n  %i" :clock-in t :clock-resume t)
+           ("p" "Phone call" entry (file "~/doc/refile.org")
+            "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+           ("n" "note" entry (file org-refile-path  "")
+            "* %? :NOTE:\n  %u" :clock-in t :clock-resume t)
+           ("j" "journal" entry (file+datetree "~/doc/diary.org")
+            "* %?\n%U\n  %i" :clock-in t :clock-resume t)
+           ("h" "Habit" entry (file "~/doc/refile.org")
+            "* NEXT %?\n%a\nSCHEDULED: %t .+d/3d\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")
+           ;;("b" "Bookmark" entry (file+headline "~/trac.org" "Bugs of Trac")
+           ("b" "Bookmark" entry (file+headline "~/work/trac.org" (let ((milestone (plist-get (plist-get org-store-link-plist :query) :milestone)))
+                                                                    (if (string= milestone "")
+                                                                        "その他"
+                                                                      milestone)))
+            "* TODO %:description
+   :PROPERTIES:
+   :ID: %(plist-get (plist-get org-store-link-plist :query) :ticket-id)
+   :CUSTOMER: %(plist-get (plist-get org-store-link-plist :query) :customer)
+   :URL: %:link
+   :END:
+   
+   
+   " :immediate-finish t)
+   
+           ("d" "daily report" entry (file+datetree "~/work/daily-report.org")
+            "* %?")
+   
+           ("w" "weekly report" entry (file+datetree "~/work/weekly-report.org")
+            "* %?")
+   
+           ))
+   
+   (defun in-turris ()
+     (string= "turris" (system-name)))
+   
+   (setq org-capture-templates-contexts
+         '(("d" (in-turris))
+           ("w" (in-turris))))
+ #+END_SRC
 
-#+RESULTS:
-| key |               |       |                                         |                                                                                                   |           |   |               |   | context      |
-|-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
-| t   | todo          | entry | (file ~/doc/refile.org )                | * TODO %?\n%U\n%a\n  %i                                                                           |           |   |               |   |              |
-| n   | note          | entry | (file ~/doc/refile.org )                | * %? :NOTE:\n  %u                                                                                 | :clock-in | t | :clock-resume | t |              |
-| j   | journal       | entry | (file+datetree ~/doc/diary.org)         | * %?\n%U\n  %i                                                                                    | :clock-in | t | :clock-resume | t |              |
-| h   | Habit         | entry | (file ~/doc/refile.org)                 | * NEXT %?\n%a\nSCHEDULED: %t .+d/3d\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n |           |   |               |   |              |
-|-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
-| d   | daily report  | entry | (file+datetree ~/doc/daily-report.org)  |                                                                                                   |           |   |               |   | アリエル社内 |
-| w   | weekly report | entry | (file+datetree ~/doc/weekly-report.org) |                                                                                                   |           |   |               |   | アリエル社内 |
-|-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
+ #+RESULTS:
+ | key |               |       |                                         |                                                                                                   |           |   |               |   | context      |
+ |-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
+ | t   | todo          | entry | (file ~/doc/refile.org )                | * TODO %?\n%U\n%a\n  %i                                                                           |           |   |               |   |              |
+ | n   | note          | entry | (file ~/doc/refile.org )                | * %? :NOTE:\n  %u                                                                                 | :clock-in | t | :clock-resume | t |              |
+ | j   | journal       | entry | (file+datetree ~/doc/diary.org)         | * %?\n%U\n  %i                                                                                    | :clock-in | t | :clock-resume | t |              |
+ | h   | Habit         | entry | (file ~/doc/refile.org)                 | * NEXT %?\n%a\nSCHEDULED: %t .+d/3d\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n |           |   |               |   |              |
+ |-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
+ | d   | daily report  | entry | (file+datetree ~/doc/daily-report.org)  |                                                                                                   |           |   |               |   | アリエル社内 |
+ | w   | weekly report | entry | (file+datetree ~/doc/weekly-report.org) |                                                                                                   |           |   |               |   | アリエル社内 |
+ |-----+---------------+-------+-----------------------------------------+---------------------------------------------------------------------------------------------------+-----------+---+---------------+---+--------------|
 
-#+BEGIN_SRC javascript
+ #+BEGIN_SRC
   javascript:location.href='org-protocol://capture://b/'+encodeURIComponent(location.href)+'/'+encodeURIComponent(document.title)+'/'+encodeURIComponent(document.evaluate('descendant::a[@class="milestone"]',%20document,%20null,%20XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,%20null).snapshotItem(0).innerHTML)
 #+END_SRC
 
@@ -986,8 +991,8 @@ C-c ' (org-edit-speclal)でコードを別バッファに表示・編集でき�
 :PROPERTIES:
 :Modified: 1323683300
 :Modified-1: <2011-12-12 月 18:48:20>
-:MTIME: 1325219186
-:MTIME-1: <2011-12-30 金 13:26:26>
+:MTIME:    1363002076
+:MTIME-1:  <2013-03-11 Mon 20:41:16>
 :END:
 
 global-highlight-changes-modeを使うと，バッファ内の更新した部分を
@@ -1000,7 +1005,7 @@ global-highlight-changes-modeを使うと，バッファ内の更新した部分
   This function is global-highlight-changes-mode. "
     (interactive)
     (when (and (stringp mode-name)
-               (string= mode-name "Org") global-highlight-changes-mode)
+               (string= mode-name "Org") highlight-changes-mode)
       (save-excursion
         (goto-char (point-min))
         (while (integerp (highlight-changes-next-change))
@@ -1016,9 +1021,11 @@ global-highlight-changes-modeを使うと，バッファ内の更新した部分
       (org-entry-put (point) "MTIME" (format "%d" (float-time time)))
       (org-entry-put (point) "MTIME-1" (format-time-string "<%Y-%m-%d %a %H:%M:%S>" time))))
   
-  ;;(add-hook 'org-mode-hook '(lambda () (global-highlight-changes-mode t)))
+  (add-hook 'org-mode-hook '(lambda () (highlight-changes-mode t)))
   ;;(remove-hook 'org-mode-hook '(lambda () (global-highlight-changes-mode t)))
-  ;;(add-hook 'after-save-hook 'org-record-header-mtime)
+  (add-hook 'after-save-hook 'org-record-header-mtime)
+  (add-hook 'after-save-hook '(lambda () (highlight-changes-remove-highlight (point-min) (point-max))))
+  ;;(remove-hook 'after-save-hook '(highlight-changes-remove-highlight (point-min) (point-max)))
   ;;(remove-hook 'after-save-hook 'org-record-header-mtime)
 #+END_SRC
 
@@ -1180,3 +1187,12 @@ Thunderlinkという、MessageIDを指定してコマンドラインからメー
     )
 #+END_SRC
 
+
+* octopress
+
+#+BEGIN_SRC emacs-lisp
+  (org-add-link-type "octpress" 'org-octporess-open)
+  (defun org-octporess-open (path &optional new-window)
+    (let ((url (concat "[[" "../.." path "]]")))
+      (org-open-link-from-string url)))
+#+END_SRC
