@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: context
+# key: context
+# --
+context "$0" do
+end

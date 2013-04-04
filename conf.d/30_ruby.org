@@ -1,0 +1,177 @@
+* ruby-electric.el
+
+中括弧や対応する括弧を自動補完してくれる。
+#+BEGIN_SRC emacs-lisp
+  (bundle ruby-electric)
+  (require 'ruby-electric)
+  (add-hook 'ruby-mode-hook '(lambda () (ruby-electric-mode t)))
+  
+  (defun ruby-insert-end ()
+    "Insert \"end\" at point and reindent current line."
+       (interactive)
+       (insert "end")
+       (ruby-indent-line t)
+       (end-of-line))
+  
+#+END_SRC
+
+* flymake-ruby
+
+リアルタイム文法チェックを行う。
+
+#+BEGIN_SRC emacs-lisp
+  (require 'flymake)
+  (defun flymake-ruby-init ()
+    (let* ((temp-file   (flymake-init-create-temp-buffer-copy
+                         'flymake-create-temp-inplace))
+           (local-file  (file-relative-name
+                         temp-file
+                         (file-name-directory buffer-file-name))))
+      (list "ruby" (list "-c" local-file))))
+   
+  (push '(".+\\.rb$" flymake-ruby-init) flymake-allowed-file-name-masks)
+  (push '("Rakefile$" flymake-ruby-init) flymake-allowed-file-name-masks)
+  
+  (push '("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3) flymake-err-line-patterns)
+  
+  (add-hook 'ruby-mode-hook
+            '(lambda ()
+               
+               ;; Don't want flymake mode for ruby regions in rhtml files and also on read only files
+               (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
+                   (flymake-mode t))
+               ))
+#+END_SRC
+
+* rcodetools
+
+
+#+BEGIN_SRC emacs-lisp
+  (bundle rcodetools)
+  (require 'rcodetools)
+#+END_SRC
+
+** xmpfilter
+
+Rubyコードに注釈として実行結果を挿入する機能。
+出力を挿入する箇所に"# =>"と書き、 M-x xmp を実行する。
+
+#+BEGIN_SRC ruby
+  def foo
+    return "aaa"
+  end
+  
+  foo # => "aaa"
+#+END_SRC
+
+* ruby-block
+
+endに対応する行を強調する。
+
+#+BEGIN_SRC emacs-lisp
+  (bundle ruby-block)
+  (require 'ruby-block)
+  (setq ruby-block-highlight-toggle 'overlay)
+  (add-hook 'ruby-mode-hook '(lambda () (ruby-block-mode t)))
+  
+#+END_SRC
+
+* rspec
+
+#+BEGIN_SRC emacs-lisp
+  (require 'rspec-mode)
+  (custom-set-variables '(rspec-use-rake-flag nil))
+  
+  ;; (bundle autotest)
+  ;; (require 'autotest)
+  
+#+END_SRC
+* rinari
+
+#+BEGIN_SRC emacs-lisp
+  ;(require 'rinari)
+#+END_SRC
+* 
+#+BEGIN_SRC emacs-lisp
+  (bundle inf-ruby)
+  
+  (add-to-list 'load-path "~/.emacs.d/elisp/ruby")
+  
+  (autoload 'ruby-mode "ruby-mode"
+    "Mode for editing ruby source files" t)
+  (setq auto-mode-alist
+        (append '(("\\.rb$" . ruby-mode)) auto-mode-alist))
+  
+  (setq interpreter-mode-alist (append '(("ruby" . ruby-mode))
+                       interpreter-mode-alist))
+  
+  (autoload 'run-ruby "inf-ruby"
+         "Run an inferior Ruby process")
+  (autoload 'inf-ruby-keys "inf-ruby"
+         "Set local key defs for inf-ruby in ruby-mode")
+  (add-hook 'ruby-mode-hook
+        '(lambda () (inf-ruby-keys)))
+  
+  
+  
+  (autoload 'rubydb "rubydb3x"
+    "run rubydb on program file in buffer *gud-file*.
+  the directory containing file becomes the initial working directory
+  and source-file directory for your debugger." t)
+  
+   (add-hook 'haml-mode-hook
+            '(lambda ()
+               (setq indent-tabs-mode nil)))
+  
+  ;;(require 'anything-rurima)
+  ;;(setq anything-rurima-index-file "~/.emacs.d/doc/rubydoc/rurima.e")
+  
+  
+  ;; (defvar anything-c-source-refe
+  ;;       `((name . "refe")
+  ;;         (candidates-file . "~/.emacs.d/doc/rubyrefm/bitclust/refe.index")    
+  ;;         (action ("Show" . anything-refe-action))))
+  
+  ;; (defun anything-refe-action (word)
+  ;;   (let ((buf-name (concat "*refe:" word "*")))
+  ;;     (with-current-buffer (get-buffer-create buf-name)
+  ;;       (call-process "refe" nil t t word)
+  ;;       (goto-char (point-min))
+  ;;       (my-view-buffer-other-window buf-name t
+  ;;                                 (lambda (dummy)
+  ;;                                   (kill-buffer-and-window))))))
+  
+  ;; (defun anything-refe ()
+  ;;   (interactive)
+  ;;   (anything anything-c-source-refe))
+  
+  ;; ;; view-buffer-other-window の switch-to-buffer-other-window を switch-to-buffer にしたもの. letf でもよい.
+  ;; (defun my-view-buffer-other-window (buffer &optional not-return exit-action)
+  ;;   (let* ((win               ; This window will be selected by
+  ;;       (get-lru-window))     ; switch-to-buffer-other-window below.
+  ;;      (return-to
+  ;;       (and (not not-return)
+  ;;            (cons (selected-window)
+  ;;              (if (eq win (selected-window))
+  ;;              t          ; Has to make new window.
+  ;;                (list
+  ;;             (window-buffer win) ; Other windows old buffer.
+  ;;             (window-start win)
+  ;;             (window-point win)))))))
+  ;;     (switch-to-buffer buffer) ;変更
+  ;;     (view-mode-enter (and return-to (cons (selected-window) return-to))
+  ;;              exit-action)))
+  
+  ;; (add-hook 'ruby-mode-hook
+  ;;   (lambda()
+  ;;     (define-key ruby-mode-map [f1] 'anything-refe)))
+  
+  ;; (defun anything-refe-at-point ()
+  ;;   (interactive)
+  ;;   (anything '(anything-c-source-refe)
+  ;;             (thing-at-point 'symbol) nil nil nil "*Refe*"))
+  ;; (define-key ruby-mode-map (kbd "C-M-;") 'anything-refe-at-point)
+  
+  
+  
+#+END_SRC

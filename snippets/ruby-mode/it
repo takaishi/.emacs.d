@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: it
+# key: it
+# --
+it "$0" do
+end
