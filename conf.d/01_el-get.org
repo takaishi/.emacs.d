@@ -20,6 +20,6 @@
   (add-to-list 'el-get-recipe-path (expand-file-name "el-get/recipes/elpa" dotfiles-dir))
   
   
-  (el-get 'sync)
+  ;;(el-get 'sync)
 #+END_SRC
 
