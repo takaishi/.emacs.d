@@ -1,4 +1,5 @@
-* require
+* 
+** require
 
 #+BEGIN_SRC emacs-lisp
   (el-get 'sync 'helm)
@@ -8,7 +9,7 @@
   (require 'helm-files)
 #+END_SRC
 
-* Basic Usage
+** Basic Usage
 
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-c h") 'helm-mini)
@@ -17,7 +18,7 @@
 #+END_SRC
 
 
-* 
+** 
 
 #+BEGIN_SRC emacs-lisp
   (defun helm-buffers-list ()
@@ -27,3 +28,4 @@
                      helm-c-source-buffer-not-found)
           :buffer "*helm buffers*" :keymap helm-c-buffer-map))
 #+END_SRC
+
