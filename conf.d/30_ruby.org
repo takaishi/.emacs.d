@@ -173,5 +173,7 @@ endに対応する行を強調する。
   ;; (define-key ruby-mode-map (kbd "C-M-;") 'anything-refe-at-point)
   
   
+  (setq auto-mode-alist
+        (append '(("\\.erb$" . rhtml-mode)) auto-mode-alist))
   
 #+END_SRC
