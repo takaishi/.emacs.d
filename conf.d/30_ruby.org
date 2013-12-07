@@ -1,20 +1,3 @@
-* ruby-electric.el
-
-中括弧や対応する括弧を自動補完してくれる。
-#+BEGIN_SRC emacs-lisp
-  (bundle ruby-electric)
-  (require 'ruby-electric)
-  (add-hook 'ruby-mode-hook '(lambda () (ruby-electric-mode t)))
-  
-  (defun ruby-insert-end ()
-    "Insert \"end\" at point and reindent current line."
-       (interactive)
-       (insert "end")
-       (ruby-indent-line t)
-       (end-of-line))
-  
-#+END_SRC
-
 * flymake-ruby
 
 リアルタイム文法チェックを行う。
