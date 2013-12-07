@@ -2,9 +2,10 @@
 ** require
 
 #+BEGIN_SRC emacs-lisp
-  (el-get 'sync 'helm)
-  (add-to-list 'load-path "~/.emacs.d/el-get/helm")
+  (bundle helm)
+  (require 'helm)
   (require 'helm-config)
+  (require 'helm-buffers)
   (require 'helm-help)
   (require 'helm-files)
 #+END_SRC
