@@ -24,9 +24,10 @@
 #+BEGIN_SRC emacs-lisp
   (defun helm-buffers-list ()
     (interactive)
-    (helm :sources '(helm-c-source-buffers-list
-                     helm-c-source-recentf
-                     helm-c-source-buffer-not-found)
-          :buffer "*helm buffers*" :keymap helm-c-buffer-map))
+    (helm :sources '(helm-source-buffers-list
+                     helm-source-recentf
+                     helm-source-buffer-not-found)
+          :buffer "*helm buffers*"
+          :keymap helm-buffer-map))
 #+END_SRC
 
