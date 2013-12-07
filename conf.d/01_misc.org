@@ -83,6 +83,9 @@
 #+END_SRC
 
 ** 履歴存数を増やす
+
+ミニバッファの履歴を保持する最大数を設定する。
+デフォルトは30だが、少なすぎるので1000にする。
 #+BEGIN_SRC emacs-lisp
 (setq history-length 1000)
 #+END_SRC
