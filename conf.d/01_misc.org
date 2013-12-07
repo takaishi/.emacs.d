@@ -74,7 +74,7 @@
 
 ** GCを減らす
 #+BEGIN_SRC emacs-lisp
-(setq gc-cons-threshold (* 50 gc-cons-threshold))
+(setq gc-cons-threshold (* 30 gc-cons-threshold))
 #+END_SRC
 
 ** ログの記録量を増やす
