@@ -1196,3 +1196,16 @@ Thunderlinkという、MessageIDを指定してコマンドラインからメー
     (let ((url (concat "[[" "../.." path "]]")))
       (org-open-link-from-string url)))
 #+END_SRC
+* その他
+
+** コードブロック内のコードに色をつける
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-fontify-natively t)
+#+END_SRC
+
+** Agendaの時間表記を時間単位に変更する
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-time-clocksum-format '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
+#+END_SRC
