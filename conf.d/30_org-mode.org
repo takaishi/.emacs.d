@@ -67,6 +67,8 @@
      '(lambda ()
         (setq fill-column 65)
         (auto-fill-mode 1)))
+
+ (org-defkey org-mode-map "\M-h" 'backward-kill-word)
  #+END_SRC
 * アジェンダファイル
 
