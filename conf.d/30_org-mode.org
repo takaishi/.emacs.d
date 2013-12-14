@@ -897,11 +897,11 @@
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'org-publish-project-alist
                '("orgmode.jp-doc"
-                 :base-directory "~/Dropbox/org/private/www/orgmode.jp/"
+                 :base-directory "~/Dropbox/doc/private/www/orgmode.jp/"
                  :base-extension "org"
-                 :publishing-directory "/ssh:rtakaishi@orgmode.jp:/var/www/orgmode.jp/"
+                 :publishing-directory "/ssh:rtak@repl.info:/var/www/orgmode.jp/"
                  :recursive t
-                 :publishing-function org-publish-org-to-html
+                 :publishing-function org-html-publish-to-html
                  :headline-levels 4
                  :auto-preamble t
                  :auto-index t
@@ -918,8 +918,8 @@
   
   (add-to-list 'org-publish-project-alist
                '("orgmode.jp-extra"
-                 :base-directory "~/Dropbox/org/private/www/orgmode.jp/"
-                 :publishing-directory "/ssh:rtakaishi@orgmode.jp:/var/www/orgmode.jp/"
+                 :base-directory "~/Dropbox/doc/private/www/orgmode.jp/"
+                 :publishing-directory "/ssh:rtak@repl.info:/var/www/orgmode.jp/"
                  :base-extension "css\\|pdf\\|png\\|jpg\\|gif\\|txt\\|js\\|scm\\|texi\\|html"
                  :publishing-function org-publish-attachment
                  :recursive t))
