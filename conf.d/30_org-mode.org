@@ -35,6 +35,14 @@
      (require 'org-habit)
      (require 'org-id)
  #+END_SRC
+
+** org-extension.el
+
+#+BEGIN_SRC emacs-lisp
+  (el-get 'sync 'org-extension)
+  (require 'org-extension)
+#+END_SRC
+
 * キーバインド
  :PROPERTIES:
  :MTIME: 1324283605
@@ -977,15 +985,6 @@ C-c ' (org-edit-speclal)でコードを別バッファに表示・編集でき�
   (ad-activate-regexp "turn-on-auto-save-buffers")
 #+END_SRC
 
-* org-extension.el
-:PROPERTIES:
-:MTIME: 1324427807
-:MTIME-1: <2011-12-21 水 09:36:47>
-:END:
-
-#+BEGIN_SRC emacs-lisp
-  ;;(require 'org-extension)
-#+END_SRC
 
 * ヘッダの最終更新時刻を記録する
 :PROPERTIES:
