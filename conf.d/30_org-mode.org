@@ -1155,15 +1155,6 @@ Datail is [[http://www.pomodorotechnique.com/][The Pomodoro Technique®]].
   (add-hook 'org-clock-out-hook 'org-pomodoro-stop)
 #+END_SRC
 
-* org-sync
-
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/Document/code/elisp/org-sync")
-  (add-to-list 'load-path "~/Dropbox/code/elisp/org-sync")
-  (mapc 'load
-        '("org-element" "os" "os-bb" "os-github" "os-rmine" "os-trac"))
-  
-#+END_SRC
 * protocol
 
 #+BEGIN_SRC emacs-lisp
