@@ -163,14 +163,17 @@
   (global-set-key [C-kp-subtract]  '(lambda nil (interactive) (djcb-zoom -1)))
 #+END_SRC
 
-* フルスクリーン
+* フルスクリーンのトグル設定
+
+- X11: http://www.emacswiki.org/emacs/FullScreen#toc17
+- OSX: http://www.emacswiki.org/emacs/FullScreen#toc23
 
 #+BEGIN_SRC emacs-lisp
-  (when run-linux
+  (when (or run-linux run-mac)
     (defun toggle-fullscreen ()
       "Toggle full screen on X11"
       (interactive)
-      (when (eq window-system 'x)
+      (when (or (eq window-system 'x) (eq window-system 'ns))
         (set-frame-parameter
          nil 'fullscreen
          (when (not (frame-parameter nil 'fullscreen)) 'fullboth))))
