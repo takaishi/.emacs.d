@@ -35,6 +35,14 @@
      (require 'org-habit)
      (require 'org-id)
  #+END_SRC
+
+** org-extension.el
+
+#+BEGIN_SRC emacs-lisp
+  (el-get 'sync 'org-extension)
+  (require 'org-extension)
+#+END_SRC
+
 * キーバインド
  :PROPERTIES:
  :MTIME: 1324283605
@@ -59,6 +67,8 @@
      '(lambda ()
         (setq fill-column 65)
         (auto-fill-mode 1)))
+
+ (org-defkey org-mode-map "\M-h" 'backward-kill-word)
  #+END_SRC
 * アジェンダファイル
 
@@ -889,11 +899,11 @@
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'org-publish-project-alist
                '("orgmode.jp-doc"
-                 :base-directory "~/Dropbox/org/private/www/orgmode.jp/"
+                 :base-directory "~/Dropbox/doc/private/www/orgmode.jp/"
                  :base-extension "org"
-                 :publishing-directory "/ssh:rtakaishi@orgmode.jp:/var/www/orgmode.jp/"
+                 :publishing-directory "/ssh:rtak@repl.info:/var/www/orgmode.jp/"
                  :recursive t
-                 :publishing-function org-publish-org-to-html
+                 :publishing-function org-html-publish-to-html
                  :headline-levels 4
                  :auto-preamble t
                  :auto-index t
@@ -910,8 +920,8 @@
   
   (add-to-list 'org-publish-project-alist
                '("orgmode.jp-extra"
-                 :base-directory "~/Dropbox/org/private/www/orgmode.jp/"
-                 :publishing-directory "/ssh:rtakaishi@orgmode.jp:/var/www/orgmode.jp/"
+                 :base-directory "~/Dropbox/doc/private/www/orgmode.jp/"
+                 :publishing-directory "/ssh:rtak@repl.info:/var/www/orgmode.jp/"
                  :base-extension "css\\|pdf\\|png\\|jpg\\|gif\\|txt\\|js\\|scm\\|texi\\|html"
                  :publishing-function org-publish-attachment
                  :recursive t))
@@ -977,15 +987,6 @@ C-c ' (org-edit-speclal)でコードを別バッファに表示・編集でき�
   (ad-activate-regexp "turn-on-auto-save-buffers")
 #+END_SRC
 
-* org-extension.el
-:PROPERTIES:
-:MTIME: 1324427807
-:MTIME-1: <2011-12-21 水 09:36:47>
-:END:
-
-#+BEGIN_SRC emacs-lisp
-  ;;(require 'org-extension)
-#+END_SRC
 
 * ヘッダの最終更新時刻を記録する
 :PROPERTIES:
@@ -1155,15 +1156,6 @@ Datail is [[http://www.pomodorotechnique.com/][The Pomodoro Technique®]].
   (add-hook 'org-clock-out-hook 'org-pomodoro-stop)
 #+END_SRC
 
-* org-sync
-
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/Document/code/elisp/org-sync")
-  (add-to-list 'load-path "~/Dropbox/code/elisp/org-sync")
-  (mapc 'load
-        '("org-element" "os" "os-bb" "os-github" "os-rmine" "os-trac"))
-  
-#+END_SRC
 * protocol
 
 #+BEGIN_SRC emacs-lisp
@@ -1195,4 +1187,17 @@ Thunderlinkという、MessageIDを指定してコマンドラインからメー
   (defun org-octporess-open (path &optional new-window)
     (let ((url (concat "[[" "../.." path "]]")))
       (org-open-link-from-string url)))
+#+END_SRC
+* その他
+
+** コードブロック内のコードに色をつける
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-src-fontify-natively t)
+#+END_SRC
+
+** Agendaの時間表記を時間単位に変更する
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-time-clocksum-format '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
 #+END_SRC

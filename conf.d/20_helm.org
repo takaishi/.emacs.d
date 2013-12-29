@@ -2,9 +2,10 @@
 ** require
 
 #+BEGIN_SRC emacs-lisp
-  (el-get 'sync 'helm)
-  (add-to-list 'load-path "~/.emacs.d/el-get/helm")
+  (bundle helm)
+  (require 'helm)
   (require 'helm-config)
+  (require 'helm-buffers)
   (require 'helm-help)
   (require 'helm-files)
 #+END_SRC
@@ -14,7 +15,7 @@
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-c h") 'helm-mini)
   (global-set-key (kbd "C-x b") 'helm-buffers-list)
-  (global-set-key (kbd "C-s") 'helm-occur)
+  ;; (global-set-key (kbd "C-s") 'helm-occur)
 #+END_SRC
 
 
@@ -23,9 +24,10 @@
 #+BEGIN_SRC emacs-lisp
   (defun helm-buffers-list ()
     (interactive)
-    (helm :sources '(helm-c-source-buffers-list
-                     helm-c-source-recentf
-                     helm-c-source-buffer-not-found)
-          :buffer "*helm buffers*" :keymap helm-c-buffer-map))
+    (helm :sources '(helm-source-buffers-list
+                     helm-source-recentf
+                     helm-source-buffer-not-found)
+          :buffer "*helm buffers*"
+          :keymap helm-buffer-map))
 #+END_SRC
 
