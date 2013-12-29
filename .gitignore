@@ -10,3 +10,8 @@ bookmarks
 .org-id-locations
 ac-comphist.dat
 tramp
+session*
+history
+shellenv*
+elpa
+bookmark
