@@ -1,3 +1,23 @@
+* SASS
+
+#+BEGIN_SRC emacs-lisp
+  (bundle antonj/scss-mode)
+
+  (require 'scss-mode)
+  (add-to-list 'auto-mode-alist '("\\.scss$" . scss-mode))
+
+  ;; インデント幅を2にする
+  ;; コンパイルは compass watchで行うので自動コンパイルをオフ
+  (defun scss-custom ()
+    "scss-mode-hook"
+    (and
+     (set (make-local-variable 'css-indent-offset) 2)
+     (set (make-local-variable 'scss-compile-at-save) nil)
+     )
+    )
+  (add-hook 'scss-mode-hook
+    '(lambda() (scss-custom)))
+#+END_SRC
 * Golang
 
 #+BEGIN_SRC emacs-lisp
@@ -265,6 +285,10 @@ endに対応する行を強調する。
   (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.js$" . javascript-mode))
   (setq js-indent-level 4)
+  (defun web-mode-hook ()
+    "Hooks for Web mode."
+    (setq web-mode-markup-indent-offset 2))
+  (add-hook 'web-mode-hook 'web-mode-hook)
 #+END_SRC
 
 * Groovy, Gradle
@@ -272,17 +296,6 @@ endに対応する行を強調する。
 #+BEGIN_SRC emacs-lisp
   (require 'groovy-mode)
   (add-to-list 'auto-mode-alist '("\\.gradle" . groovy-mode))
-#+END_SRC
-
-* Rst
-#+BEGIN_SRC emacs-lisp
-  (mmm-add-classes
-   '((mmm-rst-javascript-mode
-      :submode javascript-mode
-      :face mmm-code-submode-face
-      :front ".. code-block:: js\n"
-      :back "\n\n")))
-  (mmm-add-mode-ext-class 'rst-mode nil 'mmm-rst-javascript-mode)
 #+END_SRC
 
 * Xml
@@ -336,4 +349,32 @@ CDATAでecmaを指定している箇所ではjavascript-modeを使う。
   ;;                "<!--"
   ;;                sgml-skip-tag-forward
   ;;                nil))
+#+END_SRC
+* Rst
+#+BEGIN_SRC emacs-lisp
+  (mmm-add-classes
+   '((mmm-rst-javascript-mode
+      :submode javascript-mode
+      :face mmm-code-submode-face
+      :front ".. code-block:: js\n"
+      :back "\n\n")))
+  (mmm-add-mode-ext-class 'rst-mode nil 'mmm-rst-javascript-mode)
+#+END_SRC
+
+* Emacs Lisp
+#+BEGIN_SRC emacs-lisp
+  (require 'jump)
+  (add-hook
+   'emacs-lisp-mode-hook
+   '(lambda()
+      (define-key emacs-lisp-mode-map "\C-cj" 'jump-symbol-at-point)
+      (define-key emacs-lisp-mode-map "\C-cb" 'jump-back)))
+
+  (el-get 'sync 'eldoc-extension)
+  (require 'eldoc)
+  (require 'eldoc-extension)
+  (setq eldoc-idle-delay 0)
+  (setq eldoc-echo-area-use-multiline-p t)
+  (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+  (add-hook 'lisp-interaction-mode-hook 'turn-on-eldoc-mode)
 #+END_SRC

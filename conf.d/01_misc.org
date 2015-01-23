@@ -87,9 +87,17 @@
 ミニバッファの履歴を保持する最大数を設定する。
 デフォルトは30だが、少なすぎるので1000にする。
 #+BEGIN_SRC emacs-lisp
-(setq history-length 1000)
+  (setq history-length 1000)
 #+END_SRC
 
+** 大きなファイルを開く際の警告を出すファイルサイズの設定
+
+デフォルトでは、10MB以上のファイルを開こうとすると警告を表示する。
+その設定を変更し、20MB以上でなければ警告しないようにする。
+
+#+BEGIN_SRC emacs-lisp
+  (setq large-file-warning-threshold (* 20 1024 1024))
+#+END_SRC
 ** ダイアログボックスを使わない
 #+BEGIN_SRC emacs-lisp
 (setq use-dialog-box nil)
@@ -161,40 +169,26 @@
 #+BEGIN_SRC emacs-lisp
   (show-paren-mode t)
 #+END_SRC
+
+** 今いるのはどの関数の中かモードラインに表示する
+
+#+BEGIN_SRC emacs-lisp
+  (setq which-function-mode t)
+  (custom-set-faces '(which-func ((t (:foreground "deep sky blue")))))
+#+END_SRC
+** その他
+
+#+BEGIN_SRC emacs-lisp
+  (setq message-log-max 10000)
+#+END_SRC
 * my-outputz
 
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "~/Dropbox/code/elisp/")
-  (require 'my-outputz)
-  (global-outputz-mode t)
+  ;; (add-to-list 'load-path "~/Dropbox/code/elisp/")
+  ;; (require 'my-outputz)
+  ;; (global-outputz-mode t)
 #+END_SRC
 
-* log
-
-
-#+BEGIN_SRC emacs-lisp
-  (defun fluend-send ()
-    (call-process "curl" nil t t "http://localhost:12000/debug.curl -D 'json={\"log\":\"hoge\"}'"))
-  
-  ;; (add-hook 'find-file-hook 'log-emacs-find)
-  
-  (defun log-emacs-find ()
-    (call-process "emacs_report" nil t t "emacs-find"
-                  (buffer-name)
-                  (int-to-string (buffer-size))
-                  (buffer-file-name)))
-    
-  ;;  (add-hook 'after-change-major-mode-hook 'log-emacs-mode)
-    (defun log-emacs-mode  ()
-      (call-process "emacs_report" nil t t "emacs-mode" (cond
-                                                         ((stringp mode-name)
-                                                          mode-name)
-                                                         ((listp mode-name)
-                                                          (car mode-name)))))
-                                                                 
-       
-       
-#+END_SRC
 * auto async
 #+BEGIN_SRC
 (require 'auto-async-byte-compile)
@@ -228,3 +222,115 @@
 #+BEGIN_SRC emacs-lisp
   (require 'po-mode)
 #+END_SRC
+
+* aqua-
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/site-lisp")
+  (require 'aqua-schema)
+  
+#+END_SRC
+* 
+
+  #+BEGIN_SRC emacs-lisp
+    ;; シンボリックリンクの読み込みを許可
+    (setq vc-follow-symlinks t)
+    ;; シンボリックリンク先のVCS内で更新が入った場合にバッファを自動更新
+    (setq auto-revert-check-vc-info t)
+  #+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'after-init-hook
+    (lambda ()
+      (message "init time: %.3f sec"
+               (float-time (time-subtract after-init-time before-init-time)))))
+  
+#+END_SRC
+* 
+#+BEGIN_SRC emacs-lisp
+  (require 'uniquify)
+  (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+#+END_SRC
+
+*
+
+#+BEGIN_SRC emacs-lisp
+  (bundle spotify/dockerfile-mode)
+  (require 'dockerfile-mode)
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+#+END_SRC
+
+* swoop
+
+#+BEGIN_SRC emacs-lisp
+
+  (bundle ShingoFukuyama/helm-swoop)
+  (require 'helm-swoop)
+  (global-set-key (kbd "M-i") 'helm-swoop)
+  (global-set-key (kbd "M-I") 'helm-swoop-back-to-last-point)
+  (global-set-key (kbd "C-c M-i") 'helm-multi-swoop)
+  (global-set-key (kbd "C-x M-i") 'helm-multi-swoop-all)
+
+  ;; isearch実行中にhelm-swoopに移行
+  (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+  ;; helm-swoop実行中にhelm-multi-swoop-allに移行
+  (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+
+  ;; Save buffer when helm-multi-swoop-edit complete
+  (setq helm-multi-swoop-edit-save t)
+
+  ;; 値がtの場合はウィンドウ内に分割、nilなら別のウィンドウを使用
+  (setq helm-swoop-split-with-multiple-windows nil)
+
+  ;; ウィンドウ分割方向 'split-window-vertically or 'split-window-horizontally
+  (setq helm-swoop-split-direction 'split-window-vertically)
+
+  ;; nilなら一覧のテキストカラーを失う代わりに、起動スピードをほんの少し上げる
+  (setq helm-swoop-speed-or-color t)
+  ;; (bundle  ShingoFukuyama/emacs-swoop)
+  ;; (bundle joddie/pcre2el)
+  ;; (bundle jwiegley/emacs-async)
+  ;; (bundle Wilfred/ht.el)
+  ;; (require 'swoop)
+  ;; (global-set-key (kbd "C-o")   'swoop)
+  ;; (global-set-key (kbd "C-M-o") 'swoop-multi)
+  ;; (global-set-key (kbd "M-o")   'swoop-pcre-regexp)
+  ;; (global-set-key (kbd "C-S-o") 'swoop-back-to-last-position)
+  ;; (global-set-key (kbd "H-6")   'swoop-migemo) ;; Option for Japanese match
+
+  ;; ;; 検索の移行
+  ;; ;; isearch     > press [C-o] > swoop
+  ;; ;; evil-search > press [C-o] > swoop
+  ;; ;; swoop       > press [C-o] > swoop-multi
+  ;; (define-key isearch-mode-map (kbd "C-o") 'swoop-from-isearch)
+  ;; (define-key evil-motion-state-map (kbd "C-o") 'swoop-from-evil-search)
+  ;; (define-key swoop-map (kbd "C-o") 'swoop-multi-from-swoop)
+#+END_SRC
+
+* dired
+
+#+BEGIN_SRC emacs-lisp
+  (when (require 'dired-list-all-mode nil t)
+    (setq dired-listing-switches "-lhFG")
+    (add-hook 'dired-mode-hook
+              (lambda ()
+                (define-key dired-mode-map "a" 'dired-list-all-mode)
+                )))
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+
+
+  (defadvice tramp-handle-vc-registered (around tramp-handle-vc-registered-around activate)
+    (let ((vc-handled-backends '(SVN Git))) ad-do-it))
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+
+
+  (require 'thingatpt)
+#+END_SRC
+

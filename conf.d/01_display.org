@@ -76,14 +76,15 @@
 #+END_SRC
 * テーマ
 #+BEGIN_SRC emacs-lisp
-(load-theme 'wombat)
+  (load-theme 'wombat)
 #+END_SRC
 
 * 起動時のフレームを設定する
 
 #+BEGIN_SRC emacs-lisp
   (when (string= (system-name) "takaishi-no-MacBook-Air.local")
-    (set-frame-font "fontset-mac"))
+    (set-frame-font "fontset-mac")
+    (add-to-list 'default-frame-alist '(alpha . (0.85 0.855))))
   
   (when (string= (system-name) "ubuntu")
     (set-frame-font "fontset-myfont"))
@@ -193,4 +194,33 @@
   (global-set-key "\C-x@" (lambda ()
                             (interactive)
                             (split-window-horizontally-n 3)))
+#+END_SRC
+
+* リージョンを選択している時にリージョン内の行数と文字数をモードラインに表示する
+
+
+#+BEGIN_SRC emacs-lisp
+  (defun count-lines-and-chars ()
+    (if mark-active
+        (format "[%3d lines, %4d chars]"
+                (count-lines (region-beginning) (region-end))
+                (- (region-end) (region-beginning)))
+      ""))
+  (add-to-list 'default-mode-line-format
+               '(:eval (count-lines-and-chars)))
+#+END_SRC
+
+* カーソルがある行をハイライト表示する
+
+この変数をNon-nilにすることで、カーソルがある行をハイライト表示し
+ます。
+
+#+BEGIN_SRC emacs-lisp
+  (setq glibal-hl-line-mode t)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  
+  ;; カーソルの点滅をとめる
+  (blink-cursor-mode 0)
 #+END_SRC

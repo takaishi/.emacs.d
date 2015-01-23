@@ -1,0 +1,5 @@
+#+BEGIN_SRC emacs-lisp
+  (setq bookmark-default-file (concat user-emacs-directory "bookmark"))
+  (setq bookmark-save-flag 1)
+  
+#+END_SRC

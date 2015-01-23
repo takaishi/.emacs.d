@@ -1,0 +1,12 @@
+#+BEGIN_SRC emacs-lisp
+  (bundle syohex/emacs-anzu)
+  (require 'anzu)
+  (global-anzu-mode 1)
+  
+  (set-face-attribute 'anzu-mode-line nil
+                      :foreground "yellow" :weight 'bold)
+  
+  (setq anzu-search-threshold 1000)
+(global-set-key (kbd "M-%") 'anzu-query-replace)
+(global-set-key (kbd "C-M-%") 'anzu-query-replace-regexp)
+#+END_SRC

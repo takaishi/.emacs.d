@@ -30,7 +30,7 @@
 
      (require 'org-capture)
    ;;  (require 'org-exp-bibtex)
-     (require 'org-latex)
+   ;;   (require 'org-latex)
      (require 'org-colview)
      (require 'org-habit)
      (require 'org-id)
@@ -80,6 +80,7 @@
  - info.org: 使ってるサービスやその支払い情報等を管理。Dropboxで同期はしていない。
  - work.org: 会社のタスクを管理
  - trac.org: チケットのインポート用
+ - habit.org: 定期的に行うもの用
 
  #+BEGIN_SRC emacs-lisp
    (setq org-agenda-files-dir "~/doc/")
@@ -89,7 +90,7 @@
      (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org" "work.org")))
     ((or run-mac (string= (system-name) "ubuntu"))
      (setq org-agenda-files-dir "~/Documents/")
-     (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org")))
+     (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org" "habit.org")))
     (run-linux
      (setq org-agenda-files-suffix '("refile.org" "todo.org" "notes.org"))))
 
@@ -110,8 +111,8 @@
     (setq org-agenda-files (cons "~/work/work.org" org-agenda-files))
     (setq org-agenda-files (cons "~/work/trac.org" org-agenda-files)))
 
-   (work-in-macbook
-    (setq org-agenda-files (cons "~/Documents/info.org" org-agenda-files)))
+   ;; (work-in-macbook
+   ;;  (setq org-agenda-files (cons "~/Documents/info.org" org-agenda-files)))
  #+END_SRC
 * アジェンダビュー
 
@@ -124,6 +125,13 @@
 
    ;; log-modeで表示するアイテム
    (setq org-agenda-log-mode-items (quote (closed state)))
+
+   (setq org-agenda-prefix-format
+     '((agenda  . " %i %-12:c%?-12t% s")
+       (timeline  . "  % s")
+       (todo  . " %i %-30:c")
+       (tags  . " %i %-12:c")
+       (search . " %i %-12:c")))
  #+END_SRC
 ** アジェンダコマンドをカスタマイズする
  #+BEGIN_SRC emacs-lisp
@@ -526,6 +534,9 @@
    :PROPERTIES:
    :ID: %(plist-get (plist-get org-store-link-plist :query) :ticket-id)
    :CUSTOMER: %(plist-get (plist-get org-store-link-plist :query) :customer)
+   :MILESTONE: %(plist-get (plist-get org-store-link-plist :query) :milestone)
+   :TYPE: %(plist-get (plist-get org-store-link-plist :query) :type)
+   :CATEGORY: %(plist-get (plist-get org-store-link-plist :query) :milestone)
    :URL: %:link
    :END:
    
@@ -1164,7 +1175,7 @@ Datail is [[http://www.pomodorotechnique.com/][The Pomodoro Technique®]].
 * thunderlink
 
 Thunderlinkという、MessageIDを指定してコマンドラインからメールを開くためのThunderbird用アドオンがある。
-このアドオンを使って、org-modeからメールをMessageIDから開くための設定。
+このアドオンを使って、org-modeからMessageIDを指定して開くための設定。
 
 #+BEGIN_SRC emacs-lisp
   (org-add-link-type "thunderlink" 'org-thunderlink-open)
@@ -1208,5 +1219,5 @@ Thunderlinkという、MessageIDを指定してコマンドラインからメー
 全て同じファイルにアーカイブするとファイルサイズが非常に大きくなるので、毎年ファイルを変えることにする。
 
 #+BEGIN_SRC emacs-lisp
-  (setq org-archive-location (concat "%s_archive_" (format-time-string "%Y" (current-time))))
+  (setq org-archive-location (concat "%s_archive_" (format-time-string "%Y" (current-time)) "::"))
 #+END_SRC
