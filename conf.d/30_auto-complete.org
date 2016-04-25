@@ -1,9 +1,0 @@
-* auto-complete
-
-#+BEGIN_SRC emacs-lisp
-  (el-get 'sync 'auto-complete)
-  (require 'auto-complete-config)
-  (setq ac-auto-show-menu 0.8)
-  (ac-config-default)
-  (setq ac-use-menu-map t)
-#+END_SRC

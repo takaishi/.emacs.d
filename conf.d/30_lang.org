@@ -21,170 +21,90 @@
 * Golang
 
 #+BEGIN_SRC emacs-lisp
-  (bundle go-mode)
-  (bundle  syohex/emacs-go-eldoc)
-  (bundle syohex/emacs-go-direx)
-  (bundle m2ym/direx-el)
-  (if (string= "turris" (system-name))
-      (progn
-        (setenv "GOROOT" "/home/takaishi_r/.gvm/gos/go1.3.3")
-        (add-to-list 'exec-path (expand-file-name "/home/takaishi_r/.gvm/gos/go1.3.3/bin"))))
+  ;; (bundle go-mode)
+  ;; (bundle  syohex/emacs-go-eldoc)
+  ;; (bundle syohex/emacs-go-direx)
+  ;; (bundle m2ym/direx-el)
+  ;; (if (string= "turris" (system-name))
+  ;;     (progn
+  ;;       (setenv "GOROOT" "/home/takaishi_r/.gvm/gos/go1.3.3")
+  ;;       (add-to-list 'exec-path (expand-file-name "/home/takaishi_r/.gvm/gos/go1.3.3/bin"))))
 
-  (if (string= "takaishi-no-MacBook-Air.local" (system-name))
-      (setenv "GOROOT" "/usr/local/Cellar/go/1.2.1/libexec"))
-  (setenv "GOPATH" (expand-file-name "/Users/rtakaishi"))
+  ;; (if (string= "takaishi-no-MacBook-Air.local" (system-name))
+  ;;     (setenv "GOROOT" "/usr/local/Cellar/go/1.2.1/libexec"))
+  ;; (setenv "GOPATH" (expand-file-name "/Users/rtakaishi"))
 
-  (require 'go-mode)
+  ;; (require 'go-mode)
 
-  ;;(add-to-list 'exec-path (expand-file-name "~/homebrew/bin"))
+  ;; ;;(add-to-list 'exec-path (expand-file-name "~/homebrew/bin"))
 
-  (add-to-list 'exec-path (expand-file-name "~/work/go/bin"))
+  ;; (add-to-list 'exec-path (expand-file-name "~/work/go/bin"))
 
-  (add-to-list 'exec-path (expand-file-name "~/go/bin"))
+  ;; (add-to-list 'exec-path (expand-file-name "~/go/bin"))
 
-  (add-hook 'go-mode-hook (lambda ()
-                            (local-set-key (kbd "M-.") 'godef-jump)))
+  ;; (add-hook 'go-mode-hook (lambda ()
+  ;;                           (local-set-key (kbd "M-.") 'godef-jump)))
 
-  (add-to-list 'load-path  (expand-file-name "~/src/github.com/nsf/gocode/emacs"))
-  (require 'go-autocomplete)
-  (require 'auto-complete-config)
-  ;;(define-key ac-mode-map (kbd "TAB") 'auto-complete)
+  ;; (add-to-list 'load-path  (expand-file-name "~/src/github.com/nsf/gocode/emacs"))
+  ;; (require 'go-autocomplete)
+  ;; (require 'auto-complete-config)
+  ;; ;;(define-key ac-mode-map (kbd "TAB") 'auto-complete)
 
-  (require 'go-eldoc) ;; Don't need to require, if you install by package.el
-  (add-hook 'go-mode-hook 'go-eldoc-setup)
-  (defun run-gofmt()
-    (if (eq major-mode 'go-mode)
-        (gofmt)))
-  (add-hook 'before-save-hook 'run-gofmt)
+  ;; (require 'go-eldoc) ;; Don't need to require, if you install by package.el
+  ;; (add-hook 'go-mode-hook 'go-eldoc-setup)
+  ;; (defun run-gofmt()
+  ;;   (if (eq major-mode 'go-mode)
+  ;;       (gofmt)))
+  ;; (add-hook 'before-save-hook 'run-gofmt)
 
-  (setq gofmt-command "goimports")
-  (add-hook 'before-save-hook #'gofmt-before-save)
+  ;; (setq gofmt-command "goimports")
+  ;; (add-hook 'before-save-hook #'gofmt-before-save)
 
-  (require 'go-direx) ;; Don't need to require, if you install by package.el
-  (define-key go-mode-map (kbd "C-c C-j") 'go-direx-pop-to-buffer)
+  ;; (require 'go-direx) ;; Don't need to require, if you install by package.el
+  ;; (define-key go-mode-map (kbd "C-c C-j") 'go-direx-pop-to-buffer)
 
-  (bundle m2ym/popwin-el)
-  (require 'popwin)
-  (setq display-buffer-function 'popwin:display-buffer)
+  ;; (bundle m2ym/popwin-el)
+  ;; (require 'popwin)
+  ;; (setq display-buffer-function 'popwin:display-buffer)
 
-  (push '("^\*go-direx:" :regexp t :position left :width 0.4 :dedicated t :stick t)
-        popwin:special-display-config)
+  ;; (push '("^\*go-direx:" :regexp t :position left :width 0.4 :dedicated t :stick t)
+  ;;       popwin:special-display-config)
 
-  (bundle dominikh/go-errcheck.el)
-  (require 'go-errcheck)
+  ;; (bundle dominikh/go-errcheck.el)
+  ;; (require 'go-errcheck)
 
-  (add-to-list 'load-path "~/src/github.com/golang/lint/misc/emacs")
-  (require 'golint)
+  ;; (add-to-list 'load-path "~/src/github.com/golang/lint/misc/emacs")
+  ;; (require 'golint)
 #+END_SRC
 
 * Ruby
-** flymake-ruby
-
-リアルタイム文法チェックを行う。
 
 #+BEGIN_SRC emacs-lisp
-  ;; (require 'flymake)
-  ;; (defun flymake-ruby-init ()
-  ;;   (let* ((temp-file   (flymake-init-create-temp-buffer-copy
-  ;;                        'flymake-create-temp-inplace))
-  ;;          (local-file  (file-relative-name
-  ;;                        temp-file
-  ;;                        (file-name-directory buffer-file-name))))
-  ;;     (list "ruby" (list "-c" local-file))))
-   
-  ;; (push '(".+\\.rb$" flymake-ruby-init) flymake-allowed-file-name-masks)
-  ;; (push '("Rakefile$" flymake-ruby-init) flymake-allowed-file-name-masks)
-  
-  ;; (push '("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3) flymake-err-line-patterns)
-  
-  ;; (add-hook 'ruby-mode-hook
-  ;;           '(lambda ()
-               
-  ;;              ;; Don't want flymake mode for ruby regions in rhtml files and also on read only files
-  ;;              (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
-  ;;                  (flymake-mode t))
-  ;;              ))
-#+END_SRC
-
-** rcodetools
-
-
-#+BEGIN_SRC emacs-lisp
-  (bundle rcodetools)
-  (require 'rcodetools)
-#+END_SRC
-
-** xmpfilter
-
-Rubyコードに注釈として実行結果を挿入する機能。
-出力を挿入する箇所に"# =>"と書き、 M-x xmp を実行する。
-
-#+BEGIN_SRC ruby
-  def foo
-    return "aaa"
-  end
-  
-  foo # => "aaa"
-#+END_SRC
-
-** ruby-block
-
-endに対応する行を強調する。
-
-#+BEGIN_SRC emacs-lisp
-  (bundle ruby-block)
-  (require 'ruby-block)
-  (setq ruby-block-highlight-toggle 'overlay)
-  (add-hook 'ruby-mode-hook '(lambda () (ruby-block-mode t)))
-  
-#+END_SRC
-
-** rspec
-
-#+BEGIN_SRC emacs-lisp
-  (require 'rspec-mode)
-  (custom-set-variables '(rspec-use-rake-flag nil))
-  
-  ;; (bundle autotest)
-  ;; (require 'autotest)
-  
-#+END_SRC
-** rinari
-
-#+BEGIN_SRC emacs-lisp
-  ;(require 'rinari)
-#+END_SRC
-** 
-#+BEGIN_SRC emacs-lisp
-  (bundle inf-ruby)
-
-  (add-to-list 'load-path "~/.emacs.d/elisp/ruby")
-
   (autoload 'ruby-mode "ruby-mode"
     "Mode for editing ruby source files" t)
-  (setq auto-mode-alist
-        (append '(("\\.rb$" . ruby-mode)) auto-mode-alist))
+  (add-to-list 'auto-mode-alist '("\\.rb$" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Gemfile$" . ruby-mode))
 
-  (setq interpreter-mode-alist (append '(("ruby" . ruby-mode))
-                       interpreter-mode-alist))
+  ;; (setq interpreter-mode-alist (append '(("ruby" . ruby-mode))
+  ;;                      interpreter-mode-alist))
 
-  (autoload 'run-ruby "inf-ruby"
-         "Run an inferior Ruby process")
-  (autoload 'inf-ruby-keys "inf-ruby"
-         "Set local key defs for inf-ruby in ruby-mode")
-  (add-hook 'ruby-mode-hook
-        '(lambda () (inf-ruby-keys)))
+  ;; (autoload 'run-ruby "inf-ruby"
+  ;;        "Run an inferior Ruby process")
+  ;; (autoload 'inf-ruby-keys "inf-ruby"
+  ;;        "Set local key defs for inf-ruby in ruby-mode")
+  ;; (add-hook 'ruby-mode-hook
+  ;;       '(lambda () (inf-ruby-keys)))
 
 
 
-  (autoload 'rubydb "rubydb3x"
-    "run rubydb on program file in buffer *gud-file*.
-  the directory containing file becomes the initial working directory
-  and source-file directory for your debugger." t)
+  ;; (autoload 'rubydb "rubydb3x"
+  ;;   "run rubydb on program file in buffer *gud-file*.
+  ;; the directory containing file becomes the initial working directory
+  ;; and source-file directory for your debugger." t)
 
-   (add-hook 'haml-mode-hook
-            '(lambda ()
-               (setq indent-tabs-mode nil)))
+  ;;  (add-hook 'haml-mode-hook
+  ;;           '(lambda ()
+  ;;              (setq indent-tabs-mode nil)))
 
   ;;(require 'anything-rurima)
   ;;(setq anything-rurima-index-file "~/.emacs.d/doc/rubydoc/rurima.e")
@@ -236,66 +156,139 @@ endに対応する行を強調する。
   ;; (define-key ruby-mode-map (kbd "C-M-;") 'anything-refe-at-point)
 
 
-  (setq auto-mode-alist
-        (append '(("\\.erb$" . rhtml-mode)) auto-mode-alist))
+  ;; (setq auto-mode-alist
+  ;;       (append '(("\\.erb$" . rhtml-mode)) auto-mode-alist))
 
-  (add-hook 'speedbar-mode-hook
-            (lambda ()
-                    (speedbar-add-supported-extension ".rb")))
+  ;; (add-hook 'speedbar-mode-hook
+  ;;           (lambda ()
+  ;;                   (speedbar-add-supported-extension ".rb")))
 #+END_SRC
 
+** flymake-ruby
+
+リアルタイム文法チェックを行う。
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'flymake)
+  ;; (defun flymake-ruby-init ()
+  ;;   (let* ((temp-file   (flymake-init-create-temp-buffer-copy
+  ;;                        'flymake-create-temp-inplace))
+  ;;          (local-file  (file-relative-name
+  ;;                        temp-file
+  ;;                        (file-name-directory buffer-file-name))))
+  ;;     (list "ruby" (list "-c" local-file))))
+   
+  ;; (push '(".+\\.rb$" flymake-ruby-init) flymake-allowed-file-name-masks)
+  ;; (push '("Rakefile$" flymake-ruby-init) flymake-allowed-file-name-masks)
+
+  ;; (push '("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3) flymake-err-line-patterns)
+
+  ;; (add-hook 'ruby-mode-hook
+  ;;           '(lambda ()
+               
+  ;;              ;; Don't want flymake mode for ruby regions in rhtml files and also on read only files
+  ;;              (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
+  ;;                  (flymake-mode t))
+  ;;              ))
+#+END_SRC
+
+** rcodetools
 
 
+#+BEGIN_SRC emacs-lisp
+  ;;(bundle rcodetools)
+  ;;(require 'rcodetools)
+#+END_SRC
 
+** xmpfilter
+
+Rubyコードに注釈として実行結果を挿入する機能。
+出力を挿入する箇所に"# =>"と書き、 M-x xmp を実行する。
+
+#+BEGIN_SRC ruby
+  def foo
+    return "aaa"
+  end
+  
+  foo # => "aaa"
+#+END_SRC
+
+** ruby-block
+
+endに対応する行を強調する。
+
+#+BEGIN_SRC emacs-lisp
+  ;; (bundle ruby-block)
+  ;; (require 'ruby-block)
+  ;; (setq ruby-block-highlight-toggle 'overlay)
+  ;; (add-hook 'ruby-mode-hook '(lambda () (ruby-block-mode t)))
+
+#+END_SRC
+
+** rspec
+
+#+BEGIN_SRC emacs-lisp
+  ;; (require 'rspec-mode)
+  ;; (custom-set-variables '(rspec-use-rake-flag nil))
+
+  ;; (bundle autotest)
+  ;; (require 'autotest)
+
+#+END_SRC
+** rinari
+
+#+BEGIN_SRC emacs-lisp
+  ;(require 'rinari)
+#+END_SRC
 * JavaScript
 
 #+BEGIN_SRC emacs-lisp
-  (bundle thomblake/js3-mode)
-  (bundle aki2o/emacs-tss)
-  (bundle joshwnj/json-mode)
-  (bundle gongo/json-reformat)
-  (bundle Sterlingg/json-snatcher)
-  (bundle aki2o/log4e)
-  (bundle aki2o/yaxception)
+  ;; (bundle thomblake/js3-mode)
+  ;; (bundle aki2o/emacs-tss)
+  ;; (bundle joshwnj/json-mode)
+  ;; (bundle gongo/json-reformat)
+  ;; (bundle Sterlingg/json-snatcher)
+  ;; (bundle aki2o/log4e)
+  ;; (bundle aki2o/yaxception)
 
-  (require 'typescript)
-  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+  ;; (require 'typescript)
+  ;; (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
 
-  (require 'tss)
+  ;; (require 'tss)
 
-  ;; Key binding
-  (setq tss-popup-help-key "C-:")
-  (setq tss-jump-to-definition-key "C->")
-  (setq tss-implement-definition-key "C-c i")
+  ;; ;; Key binding
+  ;; (setq tss-popup-help-key "C-:")
+  ;; (setq tss-jump-to-definition-key "C->")
+  ;; (setq tss-implement-definition-key "C-c i")
 
-  ;; Make config suit for you. About the config item, eval the following sexp.
-  ;; (customize-group "tss")
+  ;; ;; Make config suit for you. About the config item, eval the following sexp.
+  ;; ;; (customize-group "tss")
 
-  ;; Do setting recommemded configuration
-  (tss-config-default)
-  (require 'coffee-mode)
-  (add-to-list 'auto-mode-alist '("\\.coffee$" . coffee-mode))
+  ;; ;; Do setting recommemded configuration
+  ;; (tss-config-default)
+  ;; (require 'coffee-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.coffee$" . coffee-mode))
 
-  (bundle danielevans/handlebars-mode)
-  (require 'handlebars-mode)
-  (add-to-list 'auto-mode-alist '("\\.hbs$" . handlebars-mode))
-  (bundle fxbois/web-mode)
-  (require 'web-mode)
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.js$" . javascript-mode))
-  (setq js-indent-level 4)
-  (defun web-mode-hook ()
-    "Hooks for Web mode."
-    (setq web-mode-markup-indent-offset 2))
-  (add-hook 'web-mode-hook 'web-mode-hook)
+  ;; (bundle danielevans/handlebars-mode)
+  ;; (require 'handlebars-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.hbs$" . handlebars-mode))
+  ;; (bundle fxbois/web-mode)
+  ;; (require 'web-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . web-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.js$" . javascript-mode))
+  ;; (setq js-indent-level 4)
+  ;; (defun web-mode-hook ()
+  ;;   "Hooks for Web mode."
+  ;;   (setq web-mode-markup-indent-offset 2))
+  ;; (add-hook 'web-mode-hook 'web-mode-hook)
 #+END_SRC
 
 * Groovy, Gradle
 
 #+BEGIN_SRC emacs-lisp
-  (require 'groovy-mode)
-  (add-to-list 'auto-mode-alist '("\\.gradle" . groovy-mode))
+  ;; (require 'groovy-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.gradle" . groovy-mode))
 #+END_SRC
 
 * Xml
@@ -363,18 +356,32 @@ CDATAでecmaを指定している箇所ではjavascript-modeを使う。
 
 * Emacs Lisp
 #+BEGIN_SRC emacs-lisp
-  (require 'jump)
-  (add-hook
-   'emacs-lisp-mode-hook
-   '(lambda()
-      (define-key emacs-lisp-mode-map "\C-cj" 'jump-symbol-at-point)
-      (define-key emacs-lisp-mode-map "\C-cb" 'jump-back)))
+  ;; (require 'jump)
+  ;; (add-hook
+  ;;  'emacs-lisp-mode-hook
+  ;;  '(lambda()
+  ;;     (define-key emacs-lisp-mode-map "\C-cj" 'jump-symbol-at-point)
+  ;;     (define-key emacs-lisp-mode-map "\C-cb" 'jump-back)))
 
-  (el-get 'sync 'eldoc-extension)
-  (require 'eldoc)
-  (require 'eldoc-extension)
-  (setq eldoc-idle-delay 0)
-  (setq eldoc-echo-area-use-multiline-p t)
-  (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
-  (add-hook 'lisp-interaction-mode-hook 'turn-on-eldoc-mode)
+  ;; (el-get 'sync 'eldoc-extension)
+  ;; (require 'eldoc)
+  ;; (require 'eldoc-extension)
+  ;; (setq eldoc-idle-delay 0)
+  ;; (setq eldoc-echo-area-use-multiline-p t)
+  ;; (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+  ;; (add-hook 'lisp-interaction-mode-hook 'turn-on-eldoc-mode)
+#+END_SRC
+* PHP
+
+#+BEGIN_SRC emacs-lisp
+  (bundle php-mode)
+  (require 'php-mode)
+  (setq auto-mode-alist (cons '("\\.php\\'" . web-mode) auto-mode-alist))
+  (setq php-mode-force-pear t)
+  (add-hook 'php-mode-user-hook
+            '(lambda ()
+               (setq tab-width 2)
+               (setq indent-tabs-mode t)
+               (setq php-manual-path "/usr/local/share/php/doc/html")
+               (setq php-manual-url "http://www.phppro.jp/phpmanual/")))
 #+END_SRC

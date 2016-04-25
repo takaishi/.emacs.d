@@ -1,0 +1,181 @@
+* COMMENT trac連携
+
+#+BEGIN_SRC emacs-lisp
+  ;; (add-to-list 'load-path "~/Dropbox/code/elisp/org-protocol-trac")
+  ;; (require 'org-protocol-trac)
+#+END_SRC
+
+ブックマークレットの例。
+
+#+BEGIN_SRC
+  javascript:location.href='org-protocol://trac-capture://b/'+encodeURIComponent(location.href)+'/'+encodeURIComponent(document.title)+'/'+encodeURIComponent(window.getSelection())+'/?'+'milestone='+encodeURIComponent(document.evaluate('descendant::a[@class=%22milestone%22]',%20document,%20null,%20XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,%20null).snapshotItem(0).innerHTML)
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+  ;; (bundle takaishi/trac-el)
+  ;; (require 'trac)
+
+  ;; (bundle takaishi/json-rpc-el)
+  ;; (require 'json-rpc)
+  ;; (setq *trac-url* "http://legion.ariel-networks.com/login/jsonrpc")
+  ;; (setq *org-trac-url* "http://legion.ariel-networks.com/login/jsonrpc")
+  ;; (defun org-trac-update-by-trac ()
+  ;;   (interactive)
+  ;;   (let ((id (string-to-number (or (org-entry-get (point) "ID") "0"))))
+  ;;     (unless (equal id 0)
+  ;;       (let* ((url *org-trac-url*)
+  ;;              (data (org-trac-get-ticket url id))
+  ;;              (trac-status (intern (concat ":" (plist-get data :status))))
+  ;;              (statues '(:new "TODO" :verifying "VERIFYING")))
+  ;;         (progn
+  ;;           (if (plist-get data :customer)
+  ;;               (org-entry-put (point) "CUSTOMER" (plist-get data :customer)))
+  ;;           (if (plist-get data :milestone)
+  ;;               (org-entry-put (point) "MILESTONE" (plist-get data :milestone)))
+  ;;           (if (plist-get data :milestone)
+  ;;               (org-entry-put (point) "TYPE" (plist-get data :type)))
+  ;;           (if (plist-get data :owner)
+  ;;               (org-entry-put (point) "OWNER" (plist-get data :owner)))
+  ;;           (if (plist-get data :reporter)
+  ;;               (org-entry-put (point) "REPORTER" (plist-get data :reporter)))
+            
+  ;;           (org-entry-put (point) "CATEGORY" (plist-get data :milestone))
+  ;;           ;;(org-entry-put (point) "PRIORITY" (plist-get data :priority))
+  ;;           )
+  ;;         (if (eq trac-status :closed)
+  ;;             (progn (message "This task is DONE.")
+  ;;                    (org-todo "DONE"))
+  ;;           (message (concat "This task is " (symbol-name trac-status))))))))
+
+  ;; (defun org-trac-all-update-by-trac ()
+  ;;   (interactive)
+  ;;   (org-map-entries
+  ;;    '(org-trac-update-by-trac)))
+
+  ;; (defun org-trac-checkout-ticket ()
+  ;;   (interactive)
+  ;;   (let* ((id (read-minibuffer "Ticket ID: "))
+  ;;          (data (json-rpc:call-method "http://legion.ariel-networks.com/login/jsonrpc" "GET" "ticket.get" (number-to-string id))))
+  ;;          (ticket (aref (assoc-default 'result data) 3))
+  ;;          (trac-status (intern (concat ":" (assoc-default 'status ticket)))))
+  ;;     data)
+
+  ;; (defun org-trac-update-milestone ()
+  ;;   (interactive)
+  ;;   (let* ((url *org-trac-url*)
+  ;;          (id (string-to-number (org-entry-get (point) "ID")))
+  ;;          (data (trac-ticket-get url id))
+  ;;          (milestone-local  (org-entry-put (point) "MILESTONE" milestone))
+  ;;          (milestone-remote (assoc-default 'milestone (aref (assoc-default 'result data) 3)))
+  ;;          )
+  ;;     (org-entry-put (point) "MILESTONE" milestone)
+  ;;     ))
+
+
+  ;; (defun org-trac-get-ticket (url id)
+  ;;   (let* ((data (trac-ticket-get url id))
+  ;;          (summary (assoc-default 'summary (aref (assoc-default 'result data) 3)))
+  ;;          (customer (assoc-default 'customer (aref (assoc-default 'result data) 3)))
+  ;;          (milestone (assoc-default 'milestone (aref (assoc-default 'result data) 3)))                       
+  ;;          (status (assoc-default 'status (aref (assoc-default 'result data) 3)))                       
+  ;;          (type (assoc-default 'type (aref (assoc-default 'result data) 3)))                       
+  ;;          (priority (assoc-default 'priority (aref (assoc-default 'result data) 3)))
+  ;;          (owner (assoc-default 'owner (aref (assoc-default 'result data) 3)))
+  ;;          (reporter (assoc-default 'reporter (aref (assoc-default 'result data) 3)))
+  ;;          )
+  ;;     `(:id ,id :summary ,summary :customer ,customer :milestone ,milestone :status ,status :type ,type :priority ,priority :owner ,owner :reporter ,reporter)))
+#+END_SRC
+
+* mu4e
+
+#+BEGIN_SRC emacs-lisp
+  ;;(require 'org-mu4e)
+#+END_SRC
+
+* 作業時間調査
+
+#+BEGIN_SRC emacs-lisp
+  (defun get-drawer (id)
+    (let ((pos (org-id-find id)))
+      (if pos
+          (with-current-buffer (get-buffer (nth 2 (split-string (car pos) "/")))
+            (save-excursion
+              (goto-char (cdr pos))
+              (re-search-forward ":LOGBOOK:" nil t)
+              (goto-char (line-beginning-position))
+              (org-element-drawer-parser nil)
+              )))))
+
+  ;; (setq r
+  ;;       (let* ((id "bcdb14aa-19fd-4265-aa19-03b07bd210e7")
+  ;;              (drawer (cadr (get-drawer id)))
+  ;;              (pos (org-id-find id))
+  ;;              (contents-begin (plist-get drawer :contents-begin))
+  ;;              (contents-end (plist-get drawer :contents-end))
+  ;;              (result ()))
+  ;;         (with-current-buffer (get-buffer (nth 2 (split-string (car pos) "/")))
+  ;;           (pop-to-buffer (current-buffer))
+  ;;           (save-excursion
+  ;;             (goto-char contents-begin)
+  ;;             (while (< (point) contents-end)
+  ;;               (goto-char (line-beginning-position))
+  ;;               (cond ((looking-at "^CLOCK: ")
+  ;;                      (re-search-forward "CLOCK: " nil t)
+  ;;                      (setq result  (cons (org-element-timestamp-parser) result)))
+  ;;                     ((looking-at "- State")
+  ;;                      (re-search-forward "- State: " nil t)
+  ;;                      (setq result (cons (buffer-substring (line-beginning-position) (line-end-position)) result))
+  ;;                      )
+  ;;                     )
+                
+  ;;               ;;(message (buffer-substring (line-beginning-position) (line-end-position)))
+  ;;               (next-line)
+  ;;               ;;(insert (format "%S" drawer))
+  ;;               )))
+  ;;         result))
+
+
+  ;; (let ((ts (plist-get (cadar r) :value))
+  ;;       (te (plist-get (cadar r) :range-end)))
+  ;;   (format-time-string "%u" (apply 'encode-time (org-parse-time-string ts))))
+
+  (defun timestamp-difference (ts te)
+    (let* ((s (- (org-float-time (apply 'encode-time (org-parse-time-string te)))
+                 (org-float-time (apply 'encode-time (org-parse-time-string ts)))))
+           (h (floor (/ s 3600)))
+           (s (- s (* 3600 h)))
+           (m (floor (/ s 60)))
+           (s (- s (* 60 s))))))
+
+
+  (defun current-day ()
+    (string-to-int (format-time-string "%u" (current-time))))
+
+  (defun get-clocks (id)
+    (let* ((drawer (cadr (get-drawer id)))
+           (pos (org-id-find id))
+           (contents-begin (plist-get drawer :contents-begin))
+           (contents-end (plist-get drawer :contents-end))
+           (result ()))
+      (if drawer
+          (with-current-buffer (get-buffer (nth 2 (split-string (car pos) "/")))
+            ;;(pop-to-buffer (current-buffer))
+            (save-excursion
+              (goto-char contents-begin)
+              (while (< (point) contents-end)
+                (goto-char (line-beginning-position))
+                (cond ((looking-at "^CLOCK: ")
+                       (re-search-forward "CLOCK: " nil t)
+                       (setq result  (cons (org-element-timestamp-parser) result)))
+                      ((looking-at "- State")
+                       (re-search-forward "- State: " nil t)
+                       ;;(setq result (cons (buffer-substring (line-beginning-position) (line-end-position)) result))
+                       ))
+                (next-line)
+                ))))
+      result))
+
+  ;;(get-clocks "bcdb14aa-19fd-4265-aa19-03b07bd210e7")
+
+#+END_SRC

@@ -30,7 +30,7 @@
 
      (require 'org-capture)
    ;;  (require 'org-exp-bibtex)
-   ;;   (require 'org-latex)
+   ;;  (require 'org-latex)
      (require 'org-colview)
      (require 'org-habit)
      (require 'org-id)
@@ -985,17 +985,17 @@ C-c ' (org-edit-speclal)でコードを別バッファに表示・編集でき�
 #+BEGIN_SRC emacs-lisp
   ;; C-c ' でコードの編集をする際，auto-save-buffersが有効になっていると衝突を起こす
   ;; 編集時に無効にし，編集が終わると有効にする
-  (defadvice org-edit-special (before turn-off-auto-save-buffers)
-    "turn-off-auto-revert-mode with org-edit-special."
-    (if auto-save-buffers-active-p
-        (auto-save-buffers-toggle)))
-  
-  (defadvice org-edit-src-exit (after turn-on-auto-save-buffers)
-    (unless auto-save-buffers-active-p
-      (auto-save-buffers-toggle)))
-  
-  (ad-activate-regexp "turn-off-auto-save-buffers")
-  (ad-activate-regexp "turn-on-auto-save-buffers")
+  ;;(defadvice org-edit-special (before turn-off-auto-save-buffers)
+  ;;  "turn-off-auto-revert-mode with org-edit-special."
+  ;;  (if auto-save-buffers-active-p
+  ;;      (auto-save-buffers-toggle)))
+  ;;
+  ;;(defadvice org-edit-src-exit (after turn-on-auto-save-buffers)
+  ;;  (unless auto-save-buffers-active-p
+  ;;    (auto-save-buffers-toggle)))
+  ;;
+  ;;(ad-activate-regexp "turn-off-auto-save-buffers")
+  ;;(ad-activate-regexp "turn-on-auto-save-buffers")
 #+END_SRC
 
 

@@ -1,21 +1,9 @@
 * zshとemacsでPATHを共有
 
-- 参照：[[http://d.hatena.ne.jp/syohex/20111117/1321503477][シェルと Emacsの PATHを共有する - Life is very short]]
-
-~/.zshrc等に以下のPerlワンライナーを追加。
-
-#+BEGIN_SRC shell-script
-  ## create emacs env file
-  perl -wle \
-      'do { print qq/(setenv "$_" "$ENV{$_}")/ if exists $ENV{$_} } for @ARGV' \
-      PATH > ~/.emacs.d/shellenv.el
-#+END_SRC
-
-.emacs等に以下を追加。
-
-#+BEGIN_SRC emacs-lisp
-  ;; load environment value
-  (load-file (expand-file-name "~/.emacs.d/shellenv.el"))
-  (dolist (path (reverse (split-string (getenv "PATH") ":")))
-    (add-to-list 'exec-path path))
-#+END_SRC
+  #+BEGIN_SRC emacs-lisp
+    (bundle exec-path-from-shell)
+    ;; load environment variables
+    ;; 追記 GEMに関する環境変数を設定すると rbenv経由で rubyがうまく使えなかったので削除
+    (let ((envs '("PATH" "VIRTUAL_ENV" "GOROOT" "GOPATH")))
+      (exec-path-from-shell-copy-envs envs))
+  #+END_SRC
