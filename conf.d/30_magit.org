@@ -1,9 +1,0 @@
-
-#+BEGIN_SRC emacs-lisp
-  (bundle magit/git-modes)
-  (bundle magit/magit)
-  (add-to-list 'load-path "~/.emacs.d/el-get/git-modes")
-  (add-to-list 'load-path "~/.emacs.d/el-get/magit")
-  (require 'magit)
-  (global-set-key [f7] 'magit-status)
-#+END_SRC
